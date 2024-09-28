@@ -1,0 +1,11 @@
+services:
+
+  backend:
+    volumes:
+      - ./app:/app
+    environment:
+      START: runserver
+    healthcheck:
+      disable: true
+networks:
+  google_indexer: {}

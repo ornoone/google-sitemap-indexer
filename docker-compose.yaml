@@ -1,0 +1,49 @@
+services:
+  database:
+    image: postgis/postgis:16-3.4
+    environment:
+      - "POSTGRES_PASSWORD=pgpassword"
+      - "POSTGRES_DB=google_indexer_backend"
+    networks:
+      - google_indexer
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+  redis:
+    image: redis:5
+    networks:
+      - google_indexer
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+  backend: &backend
+    build:
+      context: .
+    container_name: google_indexer_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    networks:
+    - google_indexer
+    environment:
+      START: gunicorn
+
+
+
+  backend_migrate:
+    <<: *backend
+    container_name: google_indexer_backend_migrate
+    environment:
+      START: migrate
+    ports: []
+
+
+
+networks:
+  google_indexer: {}
+
+volumes:
+  postgres:
