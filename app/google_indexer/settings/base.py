@@ -72,6 +72,9 @@ TEMPLATES = [
     },
 ]
 
+
+FORM_RENDERER = "google_indexer.libs.utils.renderer.CustomFormRenderer"
+
 WSGI_APPLICATION = 'google_indexer.wsgi.application'
 
 

@@ -1,12 +1,12 @@
 {% load static %}
 <!doctype html>
-<html lang="en">
+<html lang="en" data-bs-core="modern" data-bs-theme="dark">
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>{% block title %} google indexer {% endblock title %}</title>
+    <title>{% block title %} google indexer - {%  block sub_title %}{% endblock sub_title %}{% endblock title %}</title>
 
     <!-- Halfmoon CSS -->
     <link href="{% static 'halfmoon.min.css' %}" rel="stylesheet">
@@ -19,8 +19,9 @@
     {% block body %}
 
         {% block nav %}
-            <nav class="navbar navbar-expand-lg"
-                 style="background-color: var(--bs-content-bg); border-bottom: var(--bs-border-width) solid var(--bs-content-border-color);">
+            <nav class="navbar navbar-expand-lg bg-dark"
+{#                 style="background-color: var(--bs-content-bg); border-bottom: var(--bs-border-width) solid var(--bs-content-border-color);"#}
+            >
                 <div class="container-fluid">
                     <a class="navbar-brand" href="#">
                         Google Indexer
@@ -33,10 +34,10 @@
                     <div class="collapse navbar-collapse" id="navbar-collapse-1">
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                             <li class="nav-item">
-                                <a class="nav-link" href="#">list of the sites</a>
+                                <a class="nav-link {% block indexer_nav_active %}{% endblock %}" href="{%  url "indexer:list" %}">list of the sites</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link active" aria-current="page" href="{% url 'admin:index' %}">admin</a>
+                                <a class="nav-link" aria-current="page" href="{% url 'admin:index' %}">admin</a>
                             </li>
                         </ul>
                     </div>
@@ -44,6 +45,9 @@
             </nav>
         {% endblock nav %}
 
+        {%  block content %}
+
+            {% endblock %}
 
     {% endblock %}
 </div>
