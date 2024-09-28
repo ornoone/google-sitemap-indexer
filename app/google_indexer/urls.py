@@ -33,3 +33,8 @@ urlpatterns = [
 if settings.DEBUG:
 
     urlpatterns = urlpatterns + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+if "debug_toolbar" in settings.INSTALLED_APPS:
+    from debug_toolbar.toolbar import debug_toolbar_urls
+
+    urlpatterns = urlpatterns + debug_toolbar_urls()

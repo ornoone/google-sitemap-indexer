@@ -39,6 +39,8 @@ services:
     environment:
       START: migrate
     ports: []
+    healthcheck:
+      disable: true
 
 
 

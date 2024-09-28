@@ -47,4 +47,6 @@ RUN --mount=type=cache,target=/root/.cache pipenv sync --dev --system
 COPY ./app /app
 RUN mkdir -p /app/media && /app/manage.py collectstatic --settings=google_indexer.settings.base --noinput
 
+USER service
+
 CMD ["/app/start.sh"]

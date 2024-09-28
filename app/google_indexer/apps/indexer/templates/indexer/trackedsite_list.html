@@ -1,0 +1,54 @@
+{%  extends "indexer/base.html" %}
+
+
+{%  block indexer_nav_active %}active{% endblock indexer_nav_active %}
+
+
+{%  block content %}
+    <form action="" method="post">
+        {%  csrf_token%}
+        <div class="row align-items-center">
+            <div class="mb-3 col">
+                {{ form.name.errors }}
+                <label class="form-label" for="{{  form.name.id_for_label }}">Email address</label>
+                <input name="{{ form.name.html_name }}" type="text" class="form-control" id="{{  form.name.id_for_label }}" required placeholder="my site">
+
+            </div>
+
+            <div class="mb-3 col">
+                {{ form.sitemap_url.errors }}
+
+                <label class="form-label" for="{{  form.sitemap_url.id_for_label }}">Email address</label>
+                <input name="{{ form.sitemap_url.html_name }}"  type="url" class="form-control" id="{{  form.sitemap_url.id_for_label }}" required placeholder="https://mysite.com/sitemap.xml">
+
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-primary ms-auto">add site</button>
+            </div>
+
+        </div>
+    </form>
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">site</th>
+            <th scope="col">map</th>
+            <th scope="col">status</th>
+            <th scope="col">total pages</th>
+            <th scope="col">details</th>
+        </tr>
+        </thead>
+        <tbody>
+        {%  for site in object_list %}
+            <tr>
+                <th scope="row"><a href="{% url "indexer:site_detail" site.id %}">{{ site.name }}</a></th>
+                <td>{{  site.sitemap_url }}</td>
+                <td>{{  site.get_status_display }}</td>
+                <td>0</td>
+                <td>pending: 0<br>error: 0</td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+{%  endblock content %}

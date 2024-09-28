@@ -1,8 +1,8 @@
-# from django.contrib import admin
-#
-# from google_indexer.apps.indexer.models import TrackedWebsite
+from django.contrib import admin
+
+from google_indexer.apps.indexer.models import TrackedSite
 
 # Register your models here.
 
 
-# admin.register(TrackedWebsite)
+admin.register(TrackedSite)

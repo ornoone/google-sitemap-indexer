@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "django.forms",
     'google_indexer.apps.indexer.apps.IndexerConfig',
     'django_extensions',
 ]
@@ -71,9 +72,6 @@ TEMPLATES = [
         },
     },
 ]
-
-
-FORM_RENDERER = "google_indexer.libs.utils.renderer.CustomFormRenderer"
 
 WSGI_APPLICATION = 'google_indexer.wsgi.application'
 
@@ -203,6 +201,13 @@ LOGGING = {
             "level": "ERROR",
             "propagate": False,
         },
+        "django.server": {
+            "handlers": [
+                "console",
+            ],
+            "level": "INFO",
+            "propagate": False,
+        },
         "django_indexer": {
             "handlers": [
                 "console",
@@ -211,6 +216,5 @@ LOGGING = {
             "level": "WARNING",
             "propagate": False,
         },
-
     },
 }
