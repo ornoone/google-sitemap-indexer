@@ -1,3 +1,5 @@
+from random import random
+
 import requests
 import xml.etree.ElementTree as ET
 
@@ -31,11 +33,10 @@ def fetch_sitemap_links(sitemap_url):
         urls = [url.text for url in root.findall(".//ns:loc", namespaces=namespace)]
 
     return urls
-
+import random
 
 def page_is_indexed(url):
-    return True
-
+    return random.randint(1, 10) < 5
 
 def call_indexation(url, apikey):
     pass
@@ -49,11 +50,16 @@ def get_available_apikey(now):
     """
     today = now.date()
     with transaction.atomic():
-        available_key = ApiKey.objects.filter(Q(last_usage__date__lt=today) | (Q(last_usage__date=today) & Q(count_of_the_day__lt=F('max_per_day')))).select_for_update().first()
+        available_key = ApiKey.objects.filter(Q(last_usage__date__lt=today) | Q(last_usage__date__isnull=True)| (Q(last_usage__date=today) & Q(count_of_the_day__lt=F('max_per_day')))).select_for_update().first()
         if available_key:
-            if available_key.last_usage.date == today:
+            if available_key.last_usage is not None and  available_key.last_usage.date == today:
                 available_key.count_of_the_day += 1
             else:
                 available_key.last_usage = today
                 available_key.count_of_the_day = 1
         return available_key
+
+
+def has_available_apikey(now):
+    today=  now.date()
+    return ApiKey.objects.filter(Q(last_usage__date__lt=today) | Q(last_usage__date__isnull=True)| (Q(last_usage__date=today) & Q(count_of_the_day__lt=F('max_per_day')))).exists()

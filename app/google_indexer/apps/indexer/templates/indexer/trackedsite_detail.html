@@ -7,8 +7,34 @@
 {% block content %}
 
     <h2>
-        {{ object.name }}  ({{  object.get_status_display }})
+        {{ object.name }} ({{ object.get_status_display }})
     </h2>
+    <ul>
+        <li>last update: {{ object.last_update }}</li>
+        <li>next update {{ object.next_update }}</li>
+    </ul>
+
+    <div class="row">
+
+    <div class="col">
+
+        <form method="post" action="{% url 'indexer:site-action' pk=object.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update" />
+            <button class="btn btn-light" type="submit">force update sitemap</button>
+        </form>
+    </div>
+    <div class="col">
+
+        <form method="post" action="{% url 'indexer:site-action' pk=object.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="reset_pages" />
+            <button class="btn btn-outline-danger" type="submit">force reset all pages</button>
+        </form>
+    </div>
+    </div>
+
+
     <a href="{{ object.sitemap_url }}">{{ object.sitemap_url }}</a>
     {% with object.get_pages_statistics as page_statistics %}
         {% with page_statistics.by_statuses_percent as percent %}
@@ -73,19 +99,19 @@
                 <th scope="row"><a href="{{ page.url }}">{{ page.url }}</a></th>
                 <td>{{ page.get_status_display }}</td>
                 <td>{{ page.next_verification }}</td>
-                <td>{{  page.last_verification }}</td>
-                <td>{{  page.last_indexation }}</td>
+                <td>{{ page.last_verification }}</td>
+                <td>{{ page.last_indexation }}</td>
                 <td>
                     <form method="post" action="{% url 'indexer:page-action' pk=page.id %}">
-                        {%  csrf_token %}
-                        <input type="hidden" name="action" value="verify" />
-                        <button class="btn-primary" type="submit">force verification</button>
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="verify"/>
+                        <button class="btn btn-outline-info" type="submit">force verification</button>
                     </form>
 
                     <form method="post" action="{% url 'indexer:page-action' pk=page.id %}">
-                        {%  csrf_token %}
-                        <input type="hidden" name="action" value="index" />
-                        <button class="btn-primary" type="submit">force indexation</button>
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="index"/>
+                        <button class="btn btn-outline-danger" type="submit">force indexation</button>
                     </form>
 
 

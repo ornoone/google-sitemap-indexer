@@ -2,17 +2,18 @@ import logging
 import datetime
 
 from django.core.cache import cache
+from django.core.cache.backends.redis import RedisCache
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
-from huey import crontab
+from huey import crontab, CancelExecution
 from huey.contrib.djhuey import db_periodic_task, db_task, lock_task
 
 from google_indexer.apps.indexer.models import SITE_STATUS_CREATED, SITE_STATUS_OK, TrackedSite, TrackedPage, \
     PAGE_STATUS_CREATED, PAGE_STATUS_INDEXED, PAGE_STATUS_NEED_INDEXATION, SITE_STATUS_PENDING, \
     PAGE_STATUS_PENDING_VERIFICATION, PAGE_STATUS_PENDING_INDEXATION_CALL, PAGE_STATUS_PENDING_INDEXATION_WAIT
 from google_indexer.apps.indexer.utils import page_is_indexed, fetch_sitemap_links, call_indexation, \
-    get_available_apikey
+    get_available_apikey, has_available_apikey
 import time
 
 # our stuff
@@ -29,6 +30,11 @@ def chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
+
+## note :
+
+# periodic_task take parameters as described in https://huey.readthedocs.io/en/latest/guide.html#periodic-tasks
+
 
 
 @lock_task('verify_stale_pages')  # Goes *after* the task decorator.
@@ -72,6 +78,10 @@ def index_pages():
 
     max_pending = (60 / WAIT_BETWEEN_VALIDATION_SECONDS) * 5
     chunk_size = max_pending - TrackedPage.objects.filter(status=PAGE_STATUS_PENDING_INDEXATION_CALL).count()
+    now = timezone.now()
+    if not has_available_apikey(now):
+        print("no more available apikeys for today, skipping execution")
+        return
     with transaction.atomic():
         filtered_page_queryset = TrackedPage.objects.filter(
             Q(
@@ -85,7 +95,7 @@ def index_pages():
 
         TrackedPage.objects.filter(pk__in=id_page_to_update).update(
             status=PAGE_STATUS_PENDING_INDEXATION_CALL,
-            last_indexation=timezone.now()
+            last_indexation=now
         )
 
     for page_id in id_page_to_update:
@@ -95,10 +105,13 @@ def index_pages():
 @db_periodic_task(crontab(minute="*/5"))
 def refresh_sitemap():
     print("will refresh_sitemap")
+
     site_to_update = []
     with transaction.atomic():
         for site in TrackedSite.objects.select_for_update().filter(
                 Q(status=SITE_STATUS_CREATED) | (Q(status=SITE_STATUS_OK) & Q(next_update__lte=timezone.now()))):
+
+            print("going to update site ", site.id)
             site.status = SITE_STATUS_PENDING
             site.save()
             site_to_update.append(site)
@@ -109,6 +122,7 @@ def refresh_sitemap():
 
 @db_task()
 def update_sitemap(site_id):
+    print("start to update sitemap")
     with transaction.atomic():
         site = TrackedSite.objects.select_for_update().filter(pk=site_id).get()
         if site.status != SITE_STATUS_PENDING:
@@ -122,18 +136,21 @@ def update_sitemap(site_id):
 
     urls = fetch_sitemap_links(site.sitemap_url)
     final_urls = set(urls)
-    existing_urls = set(site.pages.all().values("url"))
+    existing_urls = set(site.pages.all().values_list("url", flat=True))
+
 
     to_create = final_urls - existing_urls
 
     to_delete = existing_urls - final_urls
 
+    print("to create %s" % len(to_create))
+    print("to delete %s" % len(to_delete))
     total = TrackedPage.objects.bulk_create([
         TrackedPage(site=site,
                     url=url)
         for url in to_create
     ])
-    print("created %s pages", total)
+    print("created %d pages" % total)
 
     for chunk in chunks(to_delete, 50):
         deleted = site.pages.filter(url__in=chunk).delete()
@@ -150,11 +167,15 @@ def update_sitemap(site_id):
 @db_task()
 def verify_page(page_id):
     end_throttle = time.time() + WAIT_BETWEEN_VALIDATION_SECONDS  # one check per 2 second max
-    with cache.lock('verification_lock'):
+    print("getting lock")
+
+    with cache.lock('verification_lock', timeout=4, blocking_timeout=8):
+        print("lock obtained")
         with transaction.atomic():
             page: TrackedPage = TrackedPage.objects.filter(id=page_id).select_for_update().first()
 
             if page is None or page.status not in (PAGE_STATUS_PENDING_VERIFICATION, PAGE_STATUS_PENDING_INDEXATION_WAIT):
+                print("page is not marked for verification. skipping")
                 return
             # this call may take some time, and will call heavy stuff
             if page_is_indexed(page.url):
@@ -174,19 +195,26 @@ def index_page(page_id):
     end_throttle = time.time() + WAIT_BETWEEN_VALIDATION_SECONDS  # one check per 2 second max
     with cache.lock('verification_lock'):
         with transaction.atomic():
+            print("indexing page ", page_id)
             page: TrackedPage = TrackedPage.objects.filter(id=page_id).select_for_update().first()
 
             if page is None or page.status != PAGE_STATUS_PENDING_VERIFICATION:
-                return
+                print("page is not marked for indexation. skipping")
+                raise CancelExecution(retry=False)
             # this call may take some time, and will call heavy stuff
             apikey = get_available_apikey(timezone.now())
             if apikey is None:
+                # page will be checked later
+                page.status = PAGE_STATUS_NEED_INDEXATION
+                page.save()
                 raise Exception("no more api key available")
 
             call_indexation(page.url, apikey)
+            print("indexation call done")
             page.status = PAGE_STATUS_PENDING_INDEXATION_WAIT
             page.next_verification = timezone.now() + datetime.timedelta(days=WAIT_VALIDATE_AFTER_INDEXATION_DAYS)
             page.last_indexation = timezone.now()
             page.save()
+            print("page saved.")
         # held the lock until the next usage of the resource can be done
         time.sleep(end_throttle - time.time())
