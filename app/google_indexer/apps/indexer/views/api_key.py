@@ -1,6 +1,6 @@
 import json
 
-from django.contrib.messages.context_processors import messages
+from django.contrib import messages
 from django.urls import reverse
 from django.views.generic import ListView, DeleteView
 from django.views.generic.edit import FormMixin, ProcessFormView

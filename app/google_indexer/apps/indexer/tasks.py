@@ -97,7 +97,7 @@ def index_pages():
         )
 
         TrackedPage.objects.filter(pk__in=id_page_to_update).update(
-            status=PAGE_STATUS_PENDING_INDEXATION_CALL,
+            status=PAGE_STATUS_PENDING_VERIFICATION,
             last_indexation=now
         )
 
@@ -153,7 +153,7 @@ def update_sitemap(site_id):
                     url=url)
         for url in to_create
     ])
-    print("created %d pages" % total)
+    print("created %d pages" % len(total))
 
     for chunk in chunks(to_delete, 50):
         deleted = site.pages.filter(url__in=chunk).delete()
