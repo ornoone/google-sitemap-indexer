@@ -5,7 +5,7 @@
 
 
 {% block content %}
-    <div>Êtes-vous sûre de vouloir supprimer la clé {{ object.name }} ?</div>
+    <div>Êtes-vous sûr de vouloir supprimer la clé {{ object.name }} ?</div>
     <form action="" method="post">
     {% csrf_token %}
         <button class="btn bg-danger">oui</button>
