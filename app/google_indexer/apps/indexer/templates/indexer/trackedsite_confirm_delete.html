@@ -1,0 +1,15 @@
+
+{% extends "indexer/base.html" %}
+
+{% block indexer_nav_active %}active{% endblock indexer_nav_active %}
+
+
+{% block content %}
+    <div>etes vous sûre de vouloir supprimer le site suivis {{ object.name }} ?</div>
+    <form action="" method="post">
+    {% csrf_token %}
+        <button class="btn bg-danger">oui</button>
+        <a href="{% url "indexer:apikey-list" %}" class="btn btn-primary">non</a>
+    </form>
+
+{% endblock content %}

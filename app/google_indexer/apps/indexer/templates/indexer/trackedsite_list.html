@@ -37,6 +37,7 @@
             <th scope="col">status</th>
             <th scope="col">total pages</th>
             <th scope="col">details</th>
+            <th scope="col">actions</th>
         </tr>
         </thead>
         <tbody>
@@ -49,6 +50,10 @@
                     <td>0</td>
                     <td>
                         {{ statistics.by_statuses.5_INDEXED|default:0 }} / {{  statistics.total }}
+                    </td>
+                    <td>
+                        <a class="btn btn-danger ms-auto" href="{% url "indexer:site-delete" pk=site.id %}">
+                            delete</a>
                     </td>
                 {% endwith %}
             </tr>
