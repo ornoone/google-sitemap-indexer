@@ -6,8 +6,10 @@ import xml.etree.ElementTree as ET
 from django.db import transaction
 from django.db.models import Q, F
 from django.utils import timezone
+from google.oauth2 import service_account
 
-from google_indexer.apps.indexer.models import ApiKey
+from google_indexer.apps.indexer.exceptions import ApiKeyExpired, ApiKeyInvalid
+from google_indexer.apps.indexer.models import ApiKey, APIKEY_VALID
 
 
 # Fonction pour extraire les liens d'un sitemap (Étape 1)
@@ -33,10 +35,13 @@ def fetch_sitemap_links(sitemap_url):
         urls = [url.text for url in root.findall(".//ns:loc", namespaces=namespace)]
 
     return urls
+
+
 import random
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+
 
 def page_is_indexed(url):
     chrome_options = Options()
@@ -54,7 +59,6 @@ def page_is_indexed(url):
     driver.get(search_url)
     page_source = str(driver.page_source)
     driver.quit()
-    print(page_source)
 
     # Détection du CAPTCHA dans le contenu de la page
     if "recaptcha" in page_source or "captcha" in page_source:
@@ -66,8 +70,36 @@ def page_is_indexed(url):
         return True
 
 
+SCOPES = ["https://www.googleapis.com/auth/indexing"]
+ENDPOINT = "https://indexing.googleapis.com/v3/urlNotifications:publish"
+from google.auth.transport.requests import Request
+
+
 def call_indexation(url, apikey):
-    pass
+    credentials = service_account.Credentials.from_service_account_info(apikey.content, scopes=SCOPES)
+    if not credentials.valid:
+        credentials.refresh(Request())
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {credentials.token}"
+    }
+    data = {
+        "url": url,
+        "type": "URL_UPDATED"
+    }
+    response = requests.post(ENDPOINT, headers=headers, json=data)
+    status_code = response.status_code
+    if status_code == 200:
+        return True
+    elif status_code == 429:
+        raise ApiKeyExpired()
+    elif status_code == 403:
+        raise ApiKeyInvalid()
+    else:
+        print("got unknown response")
+        print(response.json())
+        raise Exception("unkwonn status code %s" % status_code)
+
 
 def get_available_apikey(now) -> ApiKey | None:
     """
@@ -78,17 +110,29 @@ def get_available_apikey(now) -> ApiKey | None:
     """
     today = now.date()
     with transaction.atomic():
-        available_key = ApiKey.objects.filter(Q(last_usage__date__lt=today) | Q(last_usage__date__isnull=True)| (Q(last_usage__date=today) & Q(count_of_the_day__lt=F('max_per_day')))).select_for_update().first()
+        available_key = ApiKey.objects.filter(
+            status=APIKEY_VALID
+        ).filter(
+            Q(last_usage__date__lt=today) |
+            Q(last_usage__date__isnull=True) |
+            (
+                    Q(last_usage__date=today) &
+                    Q(count_of_the_day__lt=F('max_per_day'))
+            )
+        ).select_for_update().first()
         if available_key:
-            if available_key.last_usage is not None and  available_key.last_usage.date == today:
+            if available_key.last_usage is not None and available_key.last_usage.date() == today:
+                available_key.last_usage = now
                 available_key.count_of_the_day += 1
             else:
-                available_key.last_usage = today
+                available_key.last_usage = now
                 available_key.count_of_the_day = 1
             available_key.save()
         return available_key
 
 
 def has_available_apikey(now):
-    today=  now.date()
-    return ApiKey.objects.filter(Q(last_usage__date__lt=today) | Q(last_usage__date__isnull=True)| (Q(last_usage__date=today) & Q(count_of_the_day__lt=F('max_per_day')))).exists()
+    today = now.date()
+    return ApiKey.objects.filter(status=APIKEY_VALID).filter(
+        Q(last_usage__date__lt=today) | Q(last_usage__date__isnull=True) | (
+                    Q(last_usage__date=today) & Q(count_of_the_day__lt=F('max_per_day')))).exists()

@@ -67,8 +67,17 @@ class TrackedPage(models.Model):
     last_indexation = models.DateTimeField(null=True, blank=True)
 
 
+APIKEY_VALID = "VALID"
+APIKEY_INVALID = "INVALID"
+
 class ApiKey(models.Model):
     name = models.CharField(max_length=255, null=False, blank=False)
+
+    status = models.CharField(max_length=255, choices=[
+        (APIKEY_VALID, "valid"),
+        (APIKEY_INVALID, "invalid"),
+    ], default=APIKEY_VALID)
+
     content = models.JSONField(null=False, blank=False)
     last_usage = models.DateTimeField(null=True, blank=True)
     count_of_the_day = models.IntegerField(default=0)

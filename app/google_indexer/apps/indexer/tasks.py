@@ -1,5 +1,6 @@
 import logging
 import datetime
+from traceback import print_exc
 
 from django.core.cache import cache
 from django.core.cache.backends.redis import RedisCache
@@ -9,9 +10,11 @@ from django.utils import timezone
 from huey import crontab, CancelExecution
 from huey.contrib.djhuey import db_periodic_task, db_task, lock_task
 
+from google_indexer.apps.indexer.exceptions import ApiKeyExpired, ApiKeyInvalid
 from google_indexer.apps.indexer.models import SITE_STATUS_CREATED, SITE_STATUS_OK, TrackedSite, TrackedPage, \
     PAGE_STATUS_CREATED, PAGE_STATUS_INDEXED, PAGE_STATUS_NEED_INDEXATION, SITE_STATUS_PENDING, \
-    PAGE_STATUS_PENDING_VERIFICATION, PAGE_STATUS_PENDING_INDEXATION_CALL, PAGE_STATUS_PENDING_INDEXATION_WAIT
+    PAGE_STATUS_PENDING_VERIFICATION, PAGE_STATUS_PENDING_INDEXATION_CALL, PAGE_STATUS_PENDING_INDEXATION_WAIT, ApiKey, \
+    APIKEY_INVALID
 from google_indexer.apps.indexer.utils import page_is_indexed, fetch_sitemap_links, call_indexation, \
     get_available_apikey, has_available_apikey
 import time
@@ -192,9 +195,10 @@ def verify_page(page_id):
         time.sleep(end_throttle - time.time())
 
 
-@db_task()
+@db_task(retries=2)
 def index_page(page_id):
     end_throttle = time.time() + WAIT_BETWEEN_VALIDATION_SECONDS  # one check per 2 second max
+    retry = False
     with cache.lock('verification_lock'):
         with transaction.atomic():
             print("indexing page ", page_id)
@@ -212,12 +216,27 @@ def index_page(page_id):
                 page.save()
                 raise Exception("no more api key available")
 
-            call_indexation(page.url, apikey)
-            print("indexation call done")
-            page.status = PAGE_STATUS_PENDING_INDEXATION_WAIT
-            page.next_verification = timezone.now() + datetime.timedelta(days=WAIT_VALIDATE_AFTER_INDEXATION_DAYS)
-            page.last_indexation = timezone.now()
-            page.save()
-            print("page saved.")
+            try:
+                call_indexation(page.url, apikey)
+                print("indexation call done")
+            except ApiKeyExpired:
+                apikey.count_of_the_day = apikey.max_per_day + 1
+                apikey.save()
+                retry = True
+            except ApiKeyInvalid:
+                apikey.status = APIKEY_INVALID
+                apikey.save()
+                retry = True
+            except Exception as e:
+                print_exc()
+            else:
+                page.status = PAGE_STATUS_PENDING_INDEXATION_WAIT
+                page.next_verification = timezone.now() + datetime.timedelta(days=WAIT_VALIDATE_AFTER_INDEXATION_DAYS)
+                page.last_indexation = timezone.now()
+                page.save()
+                print("page saved.")
         # held the lock until the next usage of the resource can be done
         time.sleep(end_throttle - time.time())
+
+    if retry:
+        raise CancelExecution()

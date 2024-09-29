@@ -22,6 +22,7 @@
         <tr>
             <th scope="col">name</th>
             <th scope="col">last usage</th>
+            <th scope="col">status</th>
             <th scope="col">usage of the day</th>
             <th scope="col">delete</th>
         </tr>
@@ -32,6 +33,7 @@
 
                 <th>{{ apikey.name }}</th>
                 <td>{{ apikey.last_usage }}</td>
+                <td>{{ apikey.get_status_display }}</td>
                 <td>{{ apikey.count_of_the_day }} / {{  apikey.max_per_day }}</td>
 
                 <td>
