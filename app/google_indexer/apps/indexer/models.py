@@ -63,3 +63,11 @@ class TrackedPage(models.Model):
     next_verification = models.DateTimeField(null=True, blank=True)
     last_verification = models.DateTimeField(null=True, blank=True)
 
+
+class ApiKey(models.Model):
+    name = models.CharField(max_length=255, null=False, blank=False)
+    content = models.JSONField(null=False, blank=False)
+    last_usage = models.DateTimeField(null=True, blank=True)
+    count_of_the_day = models.IntegerField(default=0)
+    max_per_day = models.IntegerField(default=200)
+
