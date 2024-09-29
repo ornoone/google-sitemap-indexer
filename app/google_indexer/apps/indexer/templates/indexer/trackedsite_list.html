@@ -1,25 +1,26 @@
-{%  extends "indexer/base.html" %}
+{% extends "indexer/base.html" %}
+
+{% block indexer_nav_active %}active{% endblock indexer_nav_active %}
 
 
-{%  block indexer_nav_active %}active{% endblock indexer_nav_active %}
-
-
-{%  block content %}
+{% block content %}
     <form action="" method="post">
-        {%  csrf_token%}
+        {% csrf_token %}
         <div class="row align-items-center">
             <div class="mb-3 col">
                 {{ form.name.errors }}
-                <label class="form-label" for="{{  form.name.id_for_label }}">Email address</label>
-                <input name="{{ form.name.html_name }}" type="text" class="form-control" id="{{  form.name.id_for_label }}" required placeholder="my site">
+                <label class="form-label" for="{{ form.name.id_for_label }}">Email address</label>
+                <input name="{{ form.name.html_name }}" type="text" class="form-control"
+                       id="{{ form.name.id_for_label }}" required placeholder="my site">
 
             </div>
 
             <div class="mb-3 col">
                 {{ form.sitemap_url.errors }}
 
-                <label class="form-label" for="{{  form.sitemap_url.id_for_label }}">Email address</label>
-                <input name="{{ form.sitemap_url.html_name }}"  type="url" class="form-control" id="{{  form.sitemap_url.id_for_label }}" required placeholder="https://mysite.com/sitemap.xml">
+                <label class="form-label" for="{{ form.sitemap_url.id_for_label }}">Email address</label>
+                <input name="{{ form.sitemap_url.html_name }}" type="url" class="form-control"
+                       id="{{ form.sitemap_url.id_for_label }}" required placeholder="https://mysite.com/sitemap.xml">
 
             </div>
             <div class="col">
@@ -39,16 +40,20 @@
         </tr>
         </thead>
         <tbody>
-        {%  for site in object_list %}
+        {% for site in object_list %}
             <tr>
-                <th scope="row"><a href="{% url "indexer:site_detail" site.id %}">{{ site.name }}</a></th>
-                <td>{{  site.sitemap_url }}</td>
-                <td>{{  site.get_status_display }}</td>
-                <td>0</td>
-                <td>pending: 0<br>error: 0</td>
+                {% with site.get_pages_statistics as statistics %}
+                    <th scope="row"><a href="{% url "indexer:site-detail" site.id %}">{{ site.name }}</a></th>
+                    <td>{{ site.sitemap_url }}</td>
+                    <td>{{ site.get_status_display }}</td>
+                    <td>0</td>
+                    <td>
+                        {{ statistics.by_statuses.5_INDEXED|default:0 }} / {{  statistics.total }}
+                    </td>
+                {% endwith %}
             </tr>
         {% endfor %}
 
         </tbody>
     </table>
-{%  endblock content %}
+{% endblock content %}

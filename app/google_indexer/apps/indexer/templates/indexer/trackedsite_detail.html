@@ -1,0 +1,74 @@
+{% extends "indexer/base.html" %}
+
+
+{% block indexer_nav_active %}active{% endblock indexer_nav_active %}
+{% block sub_title %}{{ block.super }} - {{ object.name }} {% endblock sub_title %}
+
+{% block content %}
+
+    <h2>
+        {{ object.name }}
+    </h2>
+    <a href="{{ object.sitemap_url }}">{{ object.sitemap_url }}</a>
+    {% with object.get_pages_statistics as page_statistics %}
+        {% with page_statistics.by_statuses_percent as percent %}
+            <div class="progress-stacked">
+                <div class="progress" role="progressbar" aria-label="created"
+                     aria-valuenow="{{ percent.PAGE_STATUS_CREATED }}" aria-valuemin="0" aria-valuemax="100"
+                     style="width: {{ percent.PAGE_STATUS_CREATED }}%">
+                    <div class="progress-bar bg-dark"></div>
+                </div>
+                <div class="progress progress-bar-striped" role="progressbar" aria-label="pending verification"
+                     aria-valuenow="{{ percent.PAGE_STATUS_PENDING_VERIFICATION }}" aria-valuemin="0"
+                     aria-valuemax="100" style="width: {{ percent.PAGE_STATUS_PENDING_VERIFICATION }}%">
+                    <div class="progress-bar bg-info"></div>
+                </div>
+                <div class="progress" role="progressbar" aria-label="need indexation"
+                     aria-valuenow="{{ percent.PAGE_STATUS_NEED_INDEXATION }}" aria-valuemin="0" aria-valuemax="100"
+                     style="width: {{ percent.PAGE_STATUS_NEED_INDEXATION }}%">
+                    <div class="progress-bar bg-warning"></div>
+                </div>
+                <div class="progress progress-bar-striped" role="progressbar" aria-label="pending indexation call"
+                     aria-valuenow="{{ percent.PAGE_STATUS_PENDING_INDEXATION_CALL }}" aria-valuemin="0"
+                     aria-valuemax="100" style="width: {{ percent.PAGE_STATUS_PENDING_INDEXATION_CALL }}%">
+                    <div class="progress-bar bg-light"></div>
+                </div>
+                <div class="progress" role="progressbar" aria-label="pending indexation by google"
+                     aria-valuenow="{{ percent.PAGE_STATUS_PENDING_INDEXATION_WAIT }}" aria-valuemin="0"
+                     aria-valuemax="100" style="width: {{ percent.PAGE_STATUS_PENDING_INDEXATION_WAIT }}%">
+                    <div class="progress-bar bg-primary"></div>
+                </div>
+                <div class="progress" role="progressbar" aria-label="indexed"
+                     aria-valuenow="{{ percent.PAGE_STATUS_INDEXED }}" aria-valuemin="0" aria-valuemax="100"
+                     style="width: {{ percent.PAGE_STATUS_INDEXED }}%">
+                    <div class="progress-bar bg-success"></div>
+                </div>
+
+            </div>
+        {% endwith %}
+    {% endwith %}
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">site</th>
+            <th scope="col">map</th>
+            <th scope="col">status</th>
+            <th scope="col">total pages</th>
+            <th scope="col">details</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for site in object_list %}
+            <tr>
+                <th scope="row"><a href="{% url "indexer:site-detail" site.id %}">{{ site.name }}</a></th>
+                <td>{{ site.sitemap_url }}</td>
+                <td>{{ site.get_status_display }}</td>
+                <td>0</td>
+                <td>pending: 0<br>error: 0</td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+{% endblock content %}

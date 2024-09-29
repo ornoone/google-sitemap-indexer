@@ -7,8 +7,10 @@ services:
       START: runserver
     healthcheck:
       disable: true
+    restart: no
 
   backend_migrate:
+
     volumes:
       - ./app:/app
 
