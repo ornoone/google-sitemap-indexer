@@ -5,7 +5,7 @@ from django.views.generic import ListView, DetailView
 from django.views.generic.edit import FormMixin, ProcessFormView, ModelFormMixin
 
 from google_indexer.apps.indexer.form import TrackedSiteForm
-from google_indexer.apps.indexer.models import TrackedSite
+from google_indexer.apps.indexer.models import TrackedSite, TrackedPage
 
 
 class TrackedSiteListView(FormMixin, ListView, ProcessFormView):
@@ -31,4 +31,7 @@ class TrackedSiteListView(FormMixin, ListView, ProcessFormView):
 class TrackedSiteDetailView(DetailView):
     model = TrackedSite
     def get_context_data(self, **kwargs):
-        return super().get_context_data(**kwargs)
+        top10 = []
+        for status, _ in TrackedPage._meta.get_field("status").flatchoices:
+            top10.extend(self.object.pages.filter(status=status).order_by('id')[:10])
+        return super().get_context_data(top10=top10, **kwargs)

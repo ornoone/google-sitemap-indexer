@@ -4,5 +4,5 @@ from .views import TrackedSiteListView, TrackedSiteDetailView
 app_name = "indexer"
 urlpatterns = [
     path("list/", TrackedSiteListView.as_view(), name="site-list"),
-    path("detail/<int:id>/", TrackedSiteDetailView.as_view(), name="site-detail"),
+    path("detail/<int:pk>/", TrackedSiteDetailView.as_view(), name="site-detail"),
 ]
