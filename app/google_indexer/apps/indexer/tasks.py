@@ -179,10 +179,12 @@ def verify_page(page_id):
                 return
             # this call may take some time, and will call heavy stuff
             if page_is_indexed(page.url):
+                print("page %s is indexed" % page.url)
                 page.status = PAGE_STATUS_INDEXED
                 page.next_verification = timezone.now() + datetime.timedelta(days=WAIT_VALIDATE_INDEXED_PAGE_DAYS)
 
             else:
+                print("page %s is not indexed"% page.url)
                 page.status = PAGE_STATUS_NEED_INDEXATION
             page.last_verification = timezone.now()
             page.save()

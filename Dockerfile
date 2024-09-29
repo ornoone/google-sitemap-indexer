@@ -34,6 +34,24 @@ RUN --mount=type=cache,sharing=locked,target=/var/cache/apt apt-get update \
 COPY ./check_http.sh /app/
 HEALTHCHECK --interval=4s --timeout=6s --retries=2 CMD ["/app/check_http.sh",  "8000"]
 
+# install chromedriver
+RUN apt-get update -qq -y && \
+    apt-get install -y \
+        libasound2 \
+        libatk-bridge2.0-0 \
+        libgtk-4-1 \
+        libnss3 \
+        xdg-utils \
+        wget && \
+    wget -q -O chrome-linux64.zip https://bit.ly/chrome-linux64-121-0-6167-85 && \
+    unzip chrome-linux64.zip && \
+    rm chrome-linux64.zip && \
+    mv chrome-linux64 /opt/chrome/ && \
+    ln -s /opt/chrome/chrome /usr/local/bin/ && \
+    wget -q -O chromedriver-linux64.zip https://bit.ly/chromedriver-linux64-121-0-6167-85 && \
+    unzip -j chromedriver-linux64.zip chromedriver-linux64/chromedriver && \
+    rm chromedriver-linux64.zip && \
+    mv chromedriver /usr/local/bin/
 
 RUN --mount=type=cache,target=/root/.cache pip install pipenv
 

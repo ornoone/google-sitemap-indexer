@@ -34,9 +34,37 @@ def fetch_sitemap_links(sitemap_url):
 
     return urls
 import random
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 
 def page_is_indexed(url):
-    return random.randint(1, 10) < 5
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--blink-settings=imagesEnabled=false")
+    chrome_options.add_argument('--log-level=3')
+    chrome_options.add_argument("--window-size=800,200")  # Taille de la fenêtre
+
+    service = Service()
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+    search_url = f"https://www.google.com/search?q=site:{url}"
+    driver.get(search_url)
+    page_source = str(driver.page_source)
+    driver.quit()
+    print(page_source)
+
+    # Détection du CAPTCHA dans le contenu de la page
+    if "recaptcha" in page_source or "captcha" in page_source:
+        raise Exception("Banned chrome driver")
+
+    if "Aucun document ne correspond aux termes de recherche spécifiés" in page_source:
+        return False
+    else:
+        return True
+
 
 def call_indexation(url, apikey):
     pass
