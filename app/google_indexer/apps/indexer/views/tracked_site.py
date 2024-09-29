@@ -5,6 +5,7 @@ from django.views.generic.edit import FormMixin, ProcessFormView
 
 from google_indexer.apps.indexer.form import TrackedSiteForm
 from google_indexer.apps.indexer.models import TrackedSite, TrackedPage
+from google_indexer.apps.indexer.tasks import update_sitemap
 
 
 class TrackedSiteListView(FormMixin, ListView, ProcessFormView):
@@ -21,6 +22,7 @@ class TrackedSiteListView(FormMixin, ListView, ProcessFormView):
         form = self.get_form()
         if form.is_valid():
             self.object = form.save()
+            update_sitemap(self.object.id)
             return HttpResponseRedirect( reverse('indexer:site-detail', kwargs={'pk': self.object.pk}))
         else:
             return self.form_invalid(form)

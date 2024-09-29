@@ -40,8 +40,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "django.forms",
-    'google_indexer.apps.indexer.apps.IndexerConfig',
+    # third party
     'django_extensions',
+    'huey.contrib.djhuey',
+    # first party
+    'google_indexer.apps.indexer.apps.IndexerConfig',
+
 ]
 
 MIDDLEWARE = [

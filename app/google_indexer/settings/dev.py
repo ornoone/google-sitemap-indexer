@@ -2,7 +2,7 @@ import copy
 import os
 
 from .base import *
-from .base import INSTALLED_APPS, LOGGING, MIDDLEWARE, REDIS_HOST, REDIS_PORT
+from .base import INSTALLED_APPS, LOGGING, MIDDLEWARE, REDIS_HOST, REDIS_PORT, HUEY
 
 DEBUG = True
 

@@ -19,6 +19,7 @@ services:
     ports:
       - "6379:6379"
     restart: unless-stopped
+
   backend: &backend
     build:
       context: .
@@ -32,10 +33,22 @@ services:
       START: gunicorn
 
 
+  backend_huey:
+    <<: *backend
+    container_name: google_indexer_huey
+    restart: always
+
+    environment:
+      START: huey
+    ports: []
+    healthcheck:
+      disable: true
 
   backend_migrate:
     <<: *backend
     container_name: google_indexer_backend_migrate
+    restart: on-failure
+
     environment:
       START: migrate
     ports: []

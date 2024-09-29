@@ -4,6 +4,8 @@
 "environs[django]" = "==11.0.0"
 "psycopg" = "==3.1.8"
 
-"django-debug-toolbar" = "*"
-"django-extensions" = "*"
+"django-debug-toolbar" = "==4.4.6"
+"django-extensions" = "==3.2.3"
+"huey" = "==2.5.2"
+"requests" = "==2.32.3"
 [dev]
