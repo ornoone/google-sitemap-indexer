@@ -41,7 +41,7 @@ def page_is_indexed(url):
 def call_indexation(url, apikey):
     pass
 
-def get_available_apikey(now):
+def get_available_apikey(now) -> ApiKey | None:
     """
     return an APIKey which have avialable slot for today.
     return None if no key have availability.
@@ -57,6 +57,7 @@ def get_available_apikey(now):
             else:
                 available_key.last_usage = today
                 available_key.count_of_the_day = 1
+            available_key.save()
         return available_key
 
 

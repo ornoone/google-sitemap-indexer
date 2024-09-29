@@ -203,6 +203,7 @@ def index_page(page_id):
                 raise CancelExecution(retry=False)
             # this call may take some time, and will call heavy stuff
             apikey = get_available_apikey(timezone.now())
+            print("got key", apikey)
             if apikey is None:
                 # page will be checked later
                 page.status = PAGE_STATUS_NEED_INDEXATION

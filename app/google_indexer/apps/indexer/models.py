@@ -74,3 +74,6 @@ class ApiKey(models.Model):
     count_of_the_day = models.IntegerField(default=0)
     max_per_day = models.IntegerField(default=200)
 
+
+    def __str__(self):
+        return f"ApiKey {self.id}. {self.last_usage} for {self.count_of_the_day}/{self.max_per_day}"
