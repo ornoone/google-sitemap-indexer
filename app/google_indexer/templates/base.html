@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>{% block title %} google indexer - {% block sub_title %}{% endblock sub_title %}{% endblock title %}</title>
+    <title>{% block title %} Google Indexer - {% block sub_title %}{% endblock sub_title %}{% endblock title %}</title>
 
     <!-- Halfmoon CSS -->
     <link href="{% static 'halfmoon.min.css' %}" rel="stylesheet">
@@ -63,7 +63,7 @@
                     {% elif message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
                         <div class="alert alert-danger" role="alert">
 
-                            <h5 class="alert-heading">error</h5>
+                            <h5 class="alert-heading">Error</h5>
                             {{ message }}
 
                         </div>
