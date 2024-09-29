@@ -15,23 +15,31 @@
     </ul>
 
     <div class="row">
+        <div class="col">
 
-    <div class="col">
+            <form method="post" action="{% url 'indexer:site-action' pk=object.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="reset_pending"/>
+                <button class="btn btn-primary" type="submit">reset pending tasks</button>
+            </form>
+        </div>
+        <div class="col">
 
-        <form method="post" action="{% url 'indexer:site-action' pk=object.id %}">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="update" />
-            <button class="btn btn-light" type="submit">force update sitemap</button>
-        </form>
-    </div>
-    <div class="col">
+            <form method="post" action="{% url 'indexer:site-action' pk=object.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update"/>
+                <button class="btn btn-light" type="submit">force update sitemap</button>
+            </form>
+        </div>
 
-        <form method="post" action="{% url 'indexer:site-action' pk=object.id %}">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="reset_pages" />
-            <button class="btn btn-outline-danger" type="submit">force reset all pages</button>
-        </form>
-    </div>
+        <div class="col">
+
+            <form method="post" action="{% url 'indexer:site-action' pk=object.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="reset_pages"/>
+                <button class="btn btn-outline-danger" type="submit">force reset all pages</button>
+            </form>
+        </div>
     </div>
 
 
@@ -40,41 +48,74 @@
         {% with page_statistics.by_statuses_percent as percent %}
             <div class="specific-h-25 progress-stacked">
                 <div class="progress fs-6" role="progressbar" aria-label="created"
-                     aria-valuenow="{{ percent.0_CREATED|floatformat:"0" }}" aria-valuemin="0" aria-valuemax="100"
+                     aria-valuenow="{{ percent.0_CREATED|floatformat:"0" }}"
+                     aria-valuemin="0"
+                     aria-valuemax="100"
                      style="width: {{ percent.0_CREATED|floatformat:"0" }}%"
                      data-bs-toggle="tooltip" data-bs-title="created"
+                     data-filter="0_CREATED"
                 >
                     <div class="progress-bar bg-primary-subtle">{{ page_statistics.by_statuses.0_CREATED|floatformat:"0" }}</div>
                 </div>
-                <div class="progress fs-6 progress-bar-striped" role="progressbar" aria-label="pending verification"
-                     aria-valuenow="{{ percent.1_PENDING_VERIFICATION|floatformat:"0" }}" aria-valuemin="0"
-                     aria-valuemax="100" style="width: {{ percent.1_PENDING_VERIFICATION|floatformat:"0" }}%"
-                     data-bs-toggle="tooltip" data-bs-title="pending verification">
+                <div class="progress fs-6 progress-bar-striped"
+                     role="progressbar"
+                     aria-label="pending verification"
+                     aria-valuenow="{{ percent.1_PENDING_VERIFICATION|floatformat:"0" }}"
+                     aria-valuemin="0"
+                     aria-valuemax="100"
+                     style="width: {{ percent.1_PENDING_VERIFICATION|floatformat:"0" }}%"
+                     data-bs-toggle="tooltip" data-bs-title="pending verification"
+                     data-filter="1_PENDING_VERIFICATION"
+                >
                     <div class="progress-bar bg-info">{{ page_statistics.by_statuses.1_PENDING_VERIFICATION|floatformat:"0" }}</div>
                 </div>
-                <div class="progress fs-6" role="progressbar" aria-label="need indexation"
-                     aria-valuenow="{{ percent.2_NEED_INDEXATION|floatformat:"0" }}" aria-valuemin="0"
+                <div class="progress fs-6"
+                     role="progressbar"
+                     aria-label="need indexation"
+                     aria-valuenow="{{ percent.2_NEED_INDEXATION|floatformat:"0" }}"
+                     aria-valuemin="0"
                      aria-valuemax="100"
                      style="width: {{ percent.2_NEED_INDEXATION|floatformat:"0" }}%"
-                     data-bs-toggle="tooltip" data-bs-title="need indexation">
+
+                     data-bs-toggle="tooltip" data-bs-title="need indexation"
+                     data-filter=2_NEED_INDEXATION
+                >
                     <div class="progress-bar bg-warning">{{ page_statistics.by_statuses.2_NEED_INDEXATION|floatformat:"0" }}</div>
                 </div>
-                <div class="progress fs-6 progress-bar-striped" role="progressbar" aria-label="pending indexation call"
-                     aria-valuenow="{{ percent.3_PENDING_INDEXATION_CALL|floatformat:"0" }}" aria-valuemin="0"
+                <div class="progress fs-6 progress-bar-striped"
+                     role="progressbar"
+                     aria-label="pending indexation call"
+                     aria-valuenow="{{ percent.3_PENDING_INDEXATION_CALL|floatformat:"0" }}"
+                     aria-valuemin="0"
                      aria-valuemax="100" style="width: {{ percent.3_PENDING_INDEXATION_CALL|floatformat:"0" }}%"
-                     data-bs-toggle="tooltip" data-bs-title="pending indexation call">
+                     data-bs-toggle="tooltip"
+                     data-bs-title="pending indexation call"
+                     data-filter="3_PENDING_INDEXATION_CALL"
+                >
                     <div class="progress-bar bg-light">{{ page_statistics.by_statuses.3_PENDING_INDEXATION_CALL|floatformat:"0" }}</div>
                 </div>
-                <div class="progress fs-6" role="progressbar" aria-label="pending indexation by google"
-                     aria-valuenow="{{ percent.4_PENDING_INDEXATION_WAIT|floatformat:"0" }}" aria-valuemin="0"
+                <div class="progress fs-6"
+                     role="progressbar"
+                     aria-label="pending indexation by google"
+                     aria-valuenow="{{ percent.4_PENDING_INDEXATION_WAIT|floatformat:"0" }}"
+                     aria-valuemin="0"
                      aria-valuemax="100" style="width: {{ percent.4_PENDING_INDEXATION_WAIT|floatformat:"0" }}%"
-                     data-bs-toggle="tooltip" data-bs-title="pending indexation by google">
+                     data-bs-toggle="tooltip"
+                     data-bs-title="pending indexation by google"
+                     data-filter="4_PENDING_INDEXATION_WAIT"
+                >
                     <div class="progress-bar bg-primary">{{ page_statistics.by_statuses.4_PENDING_INDEXATION_WAIT|floatformat:"0" }}</div>
                 </div>
-                <div class="progress fs-6" role="progressbar" aria-label="indexed"
-                     aria-valuenow="{{ percent.5_INDEXED|floatformat:"0" }}" aria-valuemin="0" aria-valuemax="100"
+                <div class="progress fs-6"
+                     role="progressbar"
+                     aria-label="indexed"
+                     aria-valuenow="{{ percent.5_INDEXED|floatformat:"0" }}"
+                     aria-valuemin="0"
+                     aria-valuemax="100"
                      style="width: {{ percent.5_INDEXED|floatformat:"0" }}%"
-                     data-bs-toggle="tooltip" data-bs-title="indexed">
+                     data-bs-toggle="tooltip" data-bs-title="indexed"
+                     data-filter="5_INDEXED"
+                >
                     <div class="progress-bar bg-success">{{ page_statistics.by_statuses.5_INDEXED|floatformat:"0" }}</div>
                 </div>
 
@@ -132,6 +173,29 @@
         const tooltipList = [...tooltipTriggerList].map(
             (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
         );
+
+
+    </script>
+
+    <script>
+
+        [...document.querySelectorAll(
+            "[data-filter]"
+        )].map(
+            elt => {
+                console.log("prout");
+                elt.addEventListener('click',(elt2) => {
+                        var filterValue = elt.getAttribute('data-filter')
+                        console.log(filterValue);
+                        var url = new URL(window.location.href);
+                        url.searchParams.set('status',filterValue);
+                        window.location.href = url.toString();
+                    }
+                )
+            }
+        );
+
+
     </script>
 
 {% endblock js %}
