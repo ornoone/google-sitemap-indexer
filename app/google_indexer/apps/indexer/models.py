@@ -64,6 +64,7 @@ class TrackedPage(models.Model):
 
     next_verification = models.DateTimeField(null=True, blank=True)
     last_verification = models.DateTimeField(null=True, blank=True)
+    last_indexation = models.DateTimeField(null=True, blank=True)
 
 
 class ApiKey(models.Model):

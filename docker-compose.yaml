@@ -31,6 +31,7 @@ services:
     - google_indexer
     environment:
       START: gunicorn
+      DJANGO_SETTINGS_MODULE: google_indexer.settings.prod
 
 
   backend_huey:
@@ -40,6 +41,7 @@ services:
 
     environment:
       START: huey
+      DJANGO_SETTINGS_MODULE: google_indexer.settings.prod
     ports: []
     healthcheck:
       disable: true

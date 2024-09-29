@@ -21,6 +21,8 @@
         <thead>
         <tr>
             <th scope="col">name</th>
+            <th scope="col">last usage</th>
+            <th scope="col">usage of the day</th>
             <th scope="col">delete</th>
         </tr>
         </thead>
@@ -28,7 +30,10 @@
         {% for apikey in object_list %}
             <tr>
 
-                <th scope="row">{{ apikey.name }}</th>
+                <th>{{ apikey.name }}</th>
+                <td>{{ apikey.last_usage }}</td>
+                <td>{{ apikey.count_of_the_day }} / {{  apikey.max_per_day }}</td>
+
                 <td>
                     <a class="btn btn-danger ms-auto" href="{% url "indexer:apikey-delete" pk=apikey.id %}">
                         delete</a>

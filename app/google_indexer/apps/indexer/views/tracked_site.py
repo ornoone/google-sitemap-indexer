@@ -1,11 +1,14 @@
+from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.views import View
 from django.views.generic import ListView, DetailView, DeleteView
+from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.edit import FormMixin, ProcessFormView
 
 from google_indexer.apps.indexer.form import TrackedSiteForm
 from google_indexer.apps.indexer.models import TrackedSite, TrackedPage
-from google_indexer.apps.indexer.tasks import update_sitemap
+from google_indexer.apps.indexer.tasks import update_sitemap, verify_page
 
 
 class TrackedSiteListView(FormMixin, ListView, ProcessFormView):
@@ -47,3 +50,16 @@ class TrackedSiteDeleteView(DeleteView):
         return reverse('indexer:site-list')
 
 
+class TrackedPageActionView(SingleObjectMixin, View):
+
+    model = TrackedPage
+
+    def post(self, request, pk):
+        object = self.get_object()
+        action = self.request.POST['action']
+        if self.request.POST.get('action', None) == 'verify':
+            messages.success(self.request, "verification enqueued successfully")
+            verify_page(object.id)
+        else:
+            messages.error(self.request, "unknown action %s" % action)
+        return HttpResponseRedirect(reverse('indexer:site-detail', kwargs={'pk': object.site_id}))

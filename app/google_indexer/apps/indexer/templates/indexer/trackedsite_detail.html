@@ -7,7 +7,7 @@
 {% block content %}
 
     <h2>
-        {{ object.name }}
+        {{ object.name }}  ({{  object.get_status_display }})
     </h2>
     <a href="{{ object.sitemap_url }}">{{ object.sitemap_url }}</a>
     {% with object.get_pages_statistics as page_statistics %}
@@ -61,8 +61,10 @@
         <tr>
             <th scope="col">url</th>
             <th scope="col">status</th>
-            <th scope="col">last update</th>
-            <th scope="col">next update</th>
+            <th scope="col">last verification</th>
+            <th scope="col">next verification</th>
+            <th scope="col">last indexation</th>
+            <th scope="col">actions</th>
         </tr>
         </thead>
         <tbody>
@@ -70,8 +72,24 @@
             <tr>
                 <th scope="row"><a href="{{ page.url }}">{{ page.url }}</a></th>
                 <td>{{ page.get_status_display }}</td>
-                <td>{{ page.last_update }}</td>
-                <td>{{  page.next_update }}</td>
+                <td>{{ page.next_verification }}</td>
+                <td>{{  page.last_verification }}</td>
+                <td>{{  page.last_indexation }}</td>
+                <td>
+                    <form method="post" action="{% url 'indexer:page-action' pk=page.id %}">
+                        {%  csrf_token %}
+                        <input type="hidden" name="action" value="verify" />
+                        <button class="btn-primary" type="submit">force verification</button>
+                    </form>
+
+                    <form method="post" action="{% url 'indexer:page-action' pk=page.id %}">
+                        {%  csrf_token %}
+                        <input type="hidden" name="action" value="index" />
+                        <button class="btn-primary" type="submit">force indexation</button>
+                    </form>
+
+
+                </td>
             </tr>
         {% endfor %}
 

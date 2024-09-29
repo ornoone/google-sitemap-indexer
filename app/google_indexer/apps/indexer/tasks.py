@@ -44,7 +44,7 @@ def verify_stale_pages():
             status=PAGE_STATUS_CREATED
         ) | (
                 Q(status=PAGE_STATUS_INDEXED) &
-                Q(next_update__lte=timezone.now())
+                Q(next_verification__lte=timezone.now())
         )
     )
     # compute how many more page we can mark as pending
@@ -59,7 +59,7 @@ def verify_stale_pages():
 
         TrackedPage.objects.filter(pk__in=id_page_to_update).update(
             status=PAGE_STATUS_PENDING_VERIFICATION,
-            last_updated=timezone.now()
+            last_verification=timezone.now()
         )
 
     for page_id in id_page_to_update:
@@ -85,7 +85,7 @@ def index_pages():
 
         TrackedPage.objects.filter(pk__in=id_page_to_update).update(
             status=PAGE_STATUS_PENDING_INDEXATION_CALL,
-            last_updated=timezone.now()
+            last_indexation=timezone.now()
         )
 
     for page_id in id_page_to_update:
@@ -186,7 +186,7 @@ def index_page(page_id):
             call_indexation(page.url, apikey)
             page.status = PAGE_STATUS_PENDING_INDEXATION_WAIT
             page.next_verification = timezone.now() + datetime.timedelta(days=WAIT_VALIDATE_AFTER_INDEXATION_DAYS)
-            page.last_verification = timezone.now()
+            page.last_indexation = timezone.now()
             page.save()
         # held the lock until the next usage of the resource can be done
         time.sleep(end_throttle - time.time())

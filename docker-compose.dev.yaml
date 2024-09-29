@@ -5,9 +5,11 @@ services:
       - ./app:/app
     environment:
       START: runserver
+      DJANGO_SETTINGS_MODULE: google_indexer.settings.dev
     healthcheck:
       disable: true
     restart: no
+
 
   backend_migrate:
 
