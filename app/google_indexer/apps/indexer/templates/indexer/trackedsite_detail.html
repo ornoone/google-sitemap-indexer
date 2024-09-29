@@ -20,7 +20,7 @@
             <form method="post" action="{% url 'indexer:site-action' pk=object.id %}">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="reset_pending"/>
-                <button class="btn btn-primary" type="submit">reset pending tasks</button>
+                <button class="btn btn-primary" type="submit">Reset pending tasks</button>
             </form>
         </div>
         <div class="col">
@@ -28,7 +28,7 @@
             <form method="post" action="{% url 'indexer:site-action' pk=object.id %}">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="update"/>
-                <button class="btn btn-light" type="submit">force update sitemap</button>
+                <button class="btn btn-light" type="submit">Force update sitemap</button>
             </form>
         </div>
 
@@ -37,7 +37,7 @@
             <form method="post" action="{% url 'indexer:site-action' pk=object.id %}">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="reset_pages"/>
-                <button class="btn btn-outline-danger" type="submit">force reset all pages</button>
+                <button class="btn btn-outline-danger" type="submit">Force reset all pages</button>
             </form>
         </div>
     </div>
@@ -126,12 +126,12 @@
     <table class="table">
         <thead>
         <tr>
-            <th scope="col">url</th>
-            <th scope="col">status</th>
-            <th scope="col">last verification</th>
-            <th scope="col">next verification</th>
-            <th scope="col">last indexation</th>
-            <th scope="col">actions</th>
+            <th scope="col">URL</th>
+            <th scope="col">Status</th>
+            <th scope="col">Last verification</th>
+            <th scope="col">Next verification</th>
+            <th scope="col">Last indexation</th>
+            <th scope="col">Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -146,13 +146,13 @@
                     <form method="post" action="{% url 'indexer:page-action' pk=page.id %}">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="verify"/>
-                        <button class="btn btn-outline-info" type="submit">force verification</button>
+                        <button class="btn btn-outline-info" type="submit">Force verification</button>
                     </form>
 
                     <form method="post" action="{% url 'indexer:page-action' pk=page.id %}">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="index"/>
-                        <button class="btn btn-outline-danger" type="submit">force indexation</button>
+                        <button class="btn btn-outline-danger" type="submit">Force indexation</button>
                     </form>
 
 
