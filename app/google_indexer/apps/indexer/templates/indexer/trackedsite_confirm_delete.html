@@ -8,8 +8,8 @@
     <div>Êtes-vous sûr de vouloir supprimer le site suivi {{ object.name }} ?</div>
     <form action="" method="post">
     {% csrf_token %}
-        <button class="btn bg-danger">oui</button>
-        <a href="{% url "indexer:apikey-list" %}" class="btn btn-primary">non</a>
+        <button class="btn bg-danger">OUI</button>
+        <a href="{% url "indexer:apikey-list" %}" class="btn btn-primary">NON</a>
     </form>
 
 {% endblock content %}
