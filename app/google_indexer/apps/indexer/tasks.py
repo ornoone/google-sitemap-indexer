@@ -14,7 +14,7 @@ from google_indexer.apps.indexer.exceptions import ApiKeyExpired, ApiKeyInvalid
 from google_indexer.apps.indexer.models import SITE_STATUS_CREATED, SITE_STATUS_OK, TrackedSite, TrackedPage, \
     PAGE_STATUS_CREATED, PAGE_STATUS_INDEXED, PAGE_STATUS_NEED_INDEXATION, SITE_STATUS_PENDING, \
     PAGE_STATUS_PENDING_VERIFICATION, PAGE_STATUS_PENDING_INDEXATION_CALL, PAGE_STATUS_PENDING_INDEXATION_WAIT, ApiKey, \
-    APIKEY_INVALID
+    APIKEY_INVALID, APIKEY_USAGE_INDEXATION, APIKEY_USAGE_VERIFICATION
 from google_indexer.apps.indexer.utils import page_is_indexed, fetch_sitemap_links, call_indexation, \
     get_available_apikey, has_available_apikey
 import time
@@ -172,7 +172,7 @@ def verify_page(page_id):
     end_throttle = time.time() + WAIT_BETWEEN_VALIDATION_SECONDS  # one check per 2 second max
     print("getting lock")
 
-    with cache.lock('verification_lock', timeout=4, blocking_timeout=8):
+    with cache.lock('verification_lock', timeout=30, blocking_timeout=8):
         print("lock obtained")
         with transaction.atomic():
             page: TrackedPage = TrackedPage.objects.filter(id=page_id).select_for_update().first()
@@ -180,8 +180,14 @@ def verify_page(page_id):
             if page is None or page.status not in (PAGE_STATUS_PENDING_VERIFICATION, PAGE_STATUS_PENDING_INDEXATION_WAIT):
                 print("page is not marked for verification. skipping")
                 return
+            apikey = get_available_apikey(timezone.now(), APIKEY_USAGE_VERIFICATION)
+            print("got key", apikey)
+            if apikey is None:
+                # page will be checked later
+                raise Exception("no more api key available")
+
             # this call may take some time, and will call heavy stuff
-            if page_is_indexed(page.url):
+            if page_is_indexed(page.url, apikey):
                 print("page %s is indexed" % page.url)
                 page.status = PAGE_STATUS_INDEXED
                 page.next_verification = timezone.now() + datetime.timedelta(days=WAIT_VALIDATE_INDEXED_PAGE_DAYS)
@@ -192,7 +198,9 @@ def verify_page(page_id):
             page.last_verification = timezone.now()
             page.save()
         # held the lock until the next usage of the resource can be done
-        time.sleep(end_throttle - time.time())
+        remaining = end_throttle - time.time()
+        if remaining > 0:
+            time.sleep(remaining)
 
 
 @db_task(retries=2)
@@ -208,7 +216,7 @@ def index_page(page_id):
                 print("page is not marked for indexation. skipping")
                 raise CancelExecution(retry=False)
             # this call may take some time, and will call heavy stuff
-            apikey = get_available_apikey(timezone.now())
+            apikey = get_available_apikey(timezone.now(), APIKEY_USAGE_INDEXATION)
             print("got key", apikey)
             if apikey is None:
                 # page will be checked later
@@ -236,7 +244,9 @@ def index_page(page_id):
                 page.save()
                 print("page saved.")
         # held the lock until the next usage of the resource can be done
-        time.sleep(end_throttle - time.time())
+        remaining = end_throttle - time.time()
+        if remaining > 0:
+            time.sleep(remaining)
 
     if retry:
         raise CancelExecution()

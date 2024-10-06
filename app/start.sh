@@ -18,11 +18,11 @@ LOGLEVEL=${LOGLEVEL:-error}
 export PYTHONUNBUFFERED=1
 
 migrate() {
-  ./manage.py migrate --noinput --settings=$DJANGO_SETTINGS_MODULE
+  exec ./manage.py migrate --noinput --settings=$DJANGO_SETTINGS_MODULE
 }
 
 start_huey() {
-  ./manage.py run_huey  --settings=$DJANGO_SETTINGS_MODULE
+  exec ./manage.py run_huey  --settings=$DJANGO_SETTINGS_MODULE
 }
 
 start_gunicorn() {

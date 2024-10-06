@@ -29,8 +29,7 @@ class ApiKeyListView(FormMixin, ListView, ProcessFormView):
                 continue
             if ApiKey.objects.filter(name=name).exists() or ApiKey.objects.filter(content=content).exists():
                 messages.error(request, "%s: file already uploaded" % name)
-
-            ApiKey.objects.create(name=name, content=content)
+            ApiKey.objects.create(name=name, content=content, usage=form.cleaned_data['usage'])
             messages.success(request, "%s: file imported" % name)
 
         return super().form_valid(form)
@@ -41,7 +40,6 @@ class ApiKeyListView(FormMixin, ListView, ProcessFormView):
         POST variables and then check if it's valid.
         """
         self.object_list = self.get_queryset()
-        print(request.FILES)
         form = self.get_form()
         if form.is_valid():
             return self.form_valid(form)

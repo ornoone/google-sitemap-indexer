@@ -1,7 +1,7 @@
 
 from django.forms import ModelForm
 from django import forms
-from google_indexer.apps.indexer.models import TrackedSite
+from google_indexer.apps.indexer.models import TrackedSite, ApiKey
 
 
 class TrackedSiteForm(ModelForm):
@@ -36,3 +36,4 @@ class MultipleFileField(forms.FileField):
 class ApikeyImportForm(forms.Form):
 
     file = MultipleFileField()
+    usage = forms.ChoiceField(choices=ApiKey._meta.get_field('usage').choices)

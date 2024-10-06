@@ -1,11 +1,11 @@
-from random import random
+import urllib.parse
+from traceback import print_exc
 
 import requests
 import xml.etree.ElementTree as ET
 
 from django.db import transaction
 from django.db.models import Q, F
-from django.utils import timezone
 from google.oauth2 import service_account
 
 from google_indexer.apps.indexer.exceptions import ApiKeyExpired, ApiKeyInvalid
@@ -37,45 +37,51 @@ def fetch_sitemap_links(sitemap_url):
     return urls
 
 
-import random
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
+def page_is_indexed(url, apikey):
 
+    SCOPES = ["https://www.googleapis.com/auth/webmasters.readonly"]
+    ENDPOINT = "https://searchconsole.googleapis.com/v1/urlInspection/index:inspect"
 
-def page_is_indexed(url):
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--blink-settings=imagesEnabled=false")
-    chrome_options.add_argument('--log-level=3')
-    chrome_options.add_argument("--window-size=800,200")  # Taille de la fenêtre
-
-    service = Service()
-    driver = webdriver.Chrome(service=service, options=chrome_options)
-    search_url = f"https://www.google.com/search?q=site:{url}"
-    driver.get(search_url)
-    page_source = str(driver.page_source)
-    driver.quit()
-
-    # Détection du CAPTCHA dans le contenu de la page
-    if "recaptcha" in page_source or "captcha" in page_source:
-        raise Exception("Banned chrome driver")
-
-    if "Aucun document ne correspond aux termes de recherche spécifiés" in page_source:
+    credentials = service_account.Credentials.from_service_account_info(apikey.content, scopes=SCOPES)
+    if not credentials.valid:
+        credentials.refresh(Request())
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {credentials.token}"
+    }
+    parsed = urllib.parse.urlparse(url)
+    data = {
+        "inspectionUrl": url + "abcd",
+        "siteUrl": f'sc-domain:{parsed.netloc}',
+        "languageCode": 'fr'
+    }
+    response = requests.post(ENDPOINT, headers=headers, json=data)
+    status_code = response.status_code
+    if status_code != 200:
+        print("error while using key %s to validate %s" % (apikey.name, url))
+        print(response.json())
         return False
-    else:
-        return True
+    ###
+    ## result for indexed page
+    # {'inspectionResult': {'inspectionResultLink': 'https://search.google.com/search-console/inspect?resource_id=sc-domain:petandzen.fr&id=kVFLlIZalzpUTXztLe7VGw&utm_medium=link&utm_source=api', 'indexStatusResult': {'verdict': 'PASS', 'coverageState': 'Envoyée et indexée', 'robotsTxtState': 'ALLOWED', 'indexingState': 'INDEXING_ALLOWED', 'lastCrawlTime': '2024-10-06T07:09:51Z', 'pageFetchState': 'SUCCESSFUL', 'googleCanonical': 'https://petandzen.fr/garde-a-domicile-chien-chat-nac/ammerschwihr', 'userCanonical': 'https://petandzen.fr/garde-a-domicile-chien-chat-nac/ammerschwihr', 'sitemap': ['https://petandzen.fr/garde.xml', 'https://petandzen.fr/sitemap.xml'], 'referringUrls': ['https://petandzen.fr/garde.xml'], 'crawledAs': 'MOBILE'}, 'mobileUsabilityResult': {'verdict': 'VERDICT_UNSPECIFIED'}, 'richResultsResult': {'verdict': 'PASS', 'detectedItems': [{'richResultType': 'Fils d&#39;Ariane', 'items': [{'name': 'Élément sans nom'}]}, {'richResultType': 'Champ de recherche associé aux liens sitelink', 'items': [{'name': 'Élément sans nom'}]}]}}}
+
+    # result for non indexed page
+    # {'inspectionResult': {'inspectionResultLink': 'https://search.google.com/search-console/inspect?resource_id=sc-domain:petandzen.fr&id=tt9FEco9gzA6HcAG_GyhaQ&utm_medium=link&utm_source=api', 'indexStatusResult': {'verdict': 'NEUTRAL', 'coverageState': 'Google ne reconnaît pas cette URL', 'robotsTxtState': 'ROBOTS_TXT_STATE_UNSPECIFIED', 'indexingState': 'INDEXING_STATE_UNSPECIFIED', 'pageFetchState': 'PAGE_FETCH_STATE_UNSPECIFIED'}, 'mobileUsabilityResult': {'verdict': 'VERDICT_UNSPECIFIED'}}}
+    response_data = response.json()
+    try:
+        return response_data['inspectionResult']['indexStatusResult']['verdict'] == 'PASS'
+    except KeyError:
+        print_exc()
+        return False
 
 
-SCOPES = ["https://www.googleapis.com/auth/indexing"]
-ENDPOINT = "https://indexing.googleapis.com/v3/urlNotifications:publish"
 from google.auth.transport.requests import Request
 
 
 def call_indexation(url, apikey):
+
+    SCOPES = ["https://www.googleapis.com/auth/indexing"]
+    ENDPOINT = "https://indexing.googleapis.com/v3/urlNotifications:publish"
     credentials = service_account.Credentials.from_service_account_info(apikey.content, scopes=SCOPES)
     if not credentials.valid:
         credentials.refresh(Request())
@@ -101,7 +107,7 @@ def call_indexation(url, apikey):
         raise Exception("unkwonn status code %s" % status_code)
 
 
-def get_available_apikey(now) -> ApiKey | None:
+def get_available_apikey(now, usage) -> ApiKey | None:
     """
     return an APIKey which have avialable slot for today.
     return None if no key have availability.
@@ -111,6 +117,7 @@ def get_available_apikey(now) -> ApiKey | None:
     today = now.date()
     with transaction.atomic():
         available_key = ApiKey.objects.filter(
+            usage=usage,
             status=APIKEY_VALID
         ).filter(
             Q(last_usage__date__lt=today) |

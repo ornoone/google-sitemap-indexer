@@ -1,4 +1,3 @@
-
 {% extends "indexer/base.html" %}
 
 {% block apikey_nav_active %}active{% endblock apikey_nav_active %}
@@ -8,19 +7,40 @@
     <form action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="row align-items-center">
-            <div class="col">Import a new set of keys (json files)</div>
+        <div class="col">Import a new set of keys (json files)</div>
+        </div>
+        <div class="row align-items-center">
+
             <div class="col">
                 <label for="{{ form.file.id_for_label }}" class="form-label">Upload your keys</label>
-                <input class="form-control" multiple=true type="file" id="{{ form.file.id_for_label }}" name="{{ form.file.html_name }}">
+                <input class="form-control" multiple=true type="file" id="{{ form.file.id_for_label }}"
+                       name="{{ form.file.html_name }}">
+            </div>
+            <div class="col">
+
+                <label class="form-label">utilisation</label>
+                {% for value, name in form.usage.field.choices %}
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" value="{{ value }}"
+                               name="{{ form.usage.html_name }}"
+                                {% if forloop.first %} checked {% endif %}
+                               id="id_{{ form.field_name.name }}_{{ forloop.counter0 }}">
+                        <label class="form-check-label"
+                               for="id_{{ form.field_name.name }}_{{ forloop.counter0 }}">{{ name }}</label>
+
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="col">
                 <button type="submit" class="btn btn-primary ms-auto">Add keys</button>
             </div>
         </div>
-        <input type="submit" value="send"/>
     </form>
     <table class="table">
         <thead>
         <tr>
             <th scope="col">Name</th>
+            <th scope="col">usage</th>
             <th scope="col">Last usage</th>
             <th scope="col">Status</th>
             <th scope="col">Key Usage Rate</th>
@@ -32,9 +52,10 @@
             <tr>
 
                 <th>{{ apikey.name }}</th>
+                <th>{{ apikey.get_usage_display }}</th>
                 <td>{{ apikey.last_usage }}</td>
                 <td>{{ apikey.get_status_display }}</td>
-                <td>{{ apikey.count_of_the_day }} / {{  apikey.max_per_day }}</td>
+                <td>{{ apikey.count_of_the_day }} / {{ apikey.max_per_day }}</td>
 
                 <td>
                     <a class="btn btn-danger ms-auto" href="{% url "indexer:apikey-delete" pk=apikey.id %}">
