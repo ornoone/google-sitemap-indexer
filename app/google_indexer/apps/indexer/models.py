@@ -43,6 +43,8 @@ class TrackedSite(models.Model):
             "by_statuses_percent": status_percent_dict,
         }
 
+    def __str__(self):
+        return self.name
 
 class TrackedPage(models.Model):
     site = models.ForeignKey(TrackedSite, on_delete=models.CASCADE, null=False, related_name="pages")
@@ -82,8 +84,8 @@ class ApiKey(models.Model):
     ], default=APIKEY_VALID)
 
     usage = models.CharField(max_length=255, null=False, blank=False, default=APIKEY_USAGE_INDEXATION, choices=[
-        (APIKEY_USAGE_INDEXATION, "indexation"),
-         (APIKEY_USAGE_VERIFICATION, "verification"),
+        (APIKEY_USAGE_INDEXATION, "⚡Indexing"),
+         (APIKEY_USAGE_VERIFICATION, "✅Checking"),
     ])
 
     content = models.JSONField(null=False, blank=False)

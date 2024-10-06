@@ -6,5 +6,5 @@ class IndexerConfig(AppConfig):
     name = 'google_indexer.apps.indexer'
 
     def ready(self):
-        pass
+        import google_indexer.apps.indexer.admin
         # import google_indexer.apps.indexer.templatetags.indexer

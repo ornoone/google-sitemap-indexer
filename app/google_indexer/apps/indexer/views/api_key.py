@@ -6,7 +6,7 @@ from django.views.generic import ListView, DeleteView
 from django.views.generic.edit import FormMixin, ProcessFormView
 
 from google_indexer.apps.indexer.form import ApikeyImportForm
-from google_indexer.apps.indexer.models import ApiKey
+from google_indexer.apps.indexer.models import ApiKey, APIKEY_USAGE_INDEXATION
 
 
 class ApiKeyListView(FormMixin, ListView, ProcessFormView):
@@ -29,7 +29,11 @@ class ApiKeyListView(FormMixin, ListView, ProcessFormView):
                 continue
             if ApiKey.objects.filter(name=name).exists() or ApiKey.objects.filter(content=content).exists():
                 messages.error(request, "%s: file already uploaded" % name)
-            ApiKey.objects.create(name=name, content=content, usage=form.cleaned_data['usage'])
+            if form.cleaned_data['usage'] == APIKEY_USAGE_INDEXATION:
+                max_per_day = 200
+            else:
+                max_per_day = 2000
+            ApiKey.objects.create(name=name, content=content, usage=form.cleaned_data['usage'], max_per_day=max_per_day)
             messages.success(request, "%s: file imported" % name)
 
         return super().form_valid(form)

@@ -3,7 +3,7 @@ import datetime
 from traceback import print_exc
 
 from django.core.cache import cache
-from django.core.cache.backends.redis import RedisCache
+from django.conf import settings
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
@@ -21,10 +21,10 @@ import time
 
 # our stuff
 
-WAIT_BETWEEN_VALIDATION_SECONDS = 2  # second
-WAIT_VALIDATE_AFTER_INDEXATION_DAYS = 3 # days
-WAIT_VALIDATE_INDEXED_PAGE_DAYS = 15 # days
-WAIT_REINDEX_SITEMAP_DAYS = 1
+WAIT_BETWEEN_VALIDATION_SECONDS = settings.WAIT_BETWEEN_VALIDATION_SECONDS
+WAIT_VALIDATE_AFTER_INDEXATION_DAYS = settings.WAIT_VALIDATE_AFTER_INDEXATION_DAYS
+WAIT_VALIDATE_INDEXED_PAGE_DAYS = settings.WAIT_VALIDATE_INDEXED_PAGE_DAYS
+WAIT_REINDEX_SITEMAP_DAYS = settings.WAIT_REINDEX_SITEMAP_DAYS
 
 logger = logging.getLogger(__name__)
 
