@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='apikey',
             name='usage',
-            field=models.CharField(choices=[('APIKEY_USAGE_INDEXATION', 'indexation'), ('APIKEY_USAGE_VERIFICATION', 'verification')], default='APIKEY_USAGE_INDEXATION', max_length=255),
+            field=models.CharField(choices=[('APIKEY_USAGE_INDEXATION', '⚡Indexing'), ('APIKEY_USAGE_VERIFICATION', '✅Checking')], default='APIKEY_USAGE_INDEXATION', max_length=255),
         ),
     ]
