@@ -57,7 +57,11 @@ def verify_stale_pages():
         )
     )
     # compute how many more page we can mark as pending
-    chunk_size = max_pending - TrackedPage.objects.filter(status=PAGE_STATUS_PENDING_VERIFICATION).count()
+    current = TrackedPage.objects.filter(status=PAGE_STATUS_PENDING_VERIFICATION).count()
+    if current > max_pending:
+        print("already %d Pending verifications pages for %s, bailing out" % (current, max_pending))
+        return
+    chunk_size = max_pending - current
 
     with transaction.atomic():
 
