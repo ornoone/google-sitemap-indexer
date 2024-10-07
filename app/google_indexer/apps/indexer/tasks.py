@@ -10,7 +10,7 @@ from django.utils import timezone
 from huey import crontab, CancelExecution
 from huey.contrib.djhuey import db_periodic_task, db_task, lock_task
 
-from google_indexer.apps.indexer.exceptions import ApiKeyExpired, ApiKeyInvalid
+from google_indexer.apps.indexer.exceptions import ApiKeyExpired, ApiKeyInvalid, WebsiteExhausted
 from google_indexer.apps.indexer.models import SITE_STATUS_CREATED, SITE_STATUS_OK, TrackedSite, TrackedPage, \
     PAGE_STATUS_CREATED, PAGE_STATUS_INDEXED, PAGE_STATUS_NEED_INDEXATION, SITE_STATUS_PENDING, \
     PAGE_STATUS_PENDING_VERIFICATION, PAGE_STATUS_PENDING_INDEXATION_CALL, PAGE_STATUS_PENDING_INDEXATION_WAIT, ApiKey, \
@@ -34,10 +34,10 @@ def chunks(lst, n):
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
 
+
 ## note :
 
 # periodic_task take parameters as described in https://huey.readthedocs.io/en/latest/guide.html#periodic-tasks
-
 
 
 @lock_task('verify_stale_pages')  # Goes *after* the task decorator.
@@ -49,12 +49,13 @@ def verify_stale_pages():
 
     max_pending = (60 / WAIT_BETWEEN_VALIDATION_SECONDS) * 5
     filtered_page_queryset = TrackedPage.objects.filter(
-        Q(
+        (Q(site__next_verification__isnull=True) | Q(site__next_verification__lt=timezone.now())) &
+        (Q(
             status=PAGE_STATUS_CREATED
         ) | (
-                Q(status=PAGE_STATUS_INDEXED) &
-                Q(next_verification__lte=timezone.now())
-        )
+                 Q(status=PAGE_STATUS_INDEXED) &
+                 Q(next_verification__lte=timezone.now())
+         ))
     )
     # compute how many more page we can mark as pending
     current = TrackedPage.objects.filter(status=PAGE_STATUS_PENDING_VERIFICATION).count()
@@ -65,15 +66,15 @@ def verify_stale_pages():
 
     with transaction.atomic():
 
-
         id_page_to_update = list(
-            filtered_page_queryset.select_for_update(skip_locked=True).values_list('id',flat=True)[:chunk_size]
+            filtered_page_queryset.select_for_update(skip_locked=True).values_list('id', flat=True)[:chunk_size]
         )
 
-        TrackedPage.objects.filter(pk__in=id_page_to_update).update(
+        total = TrackedPage.objects.filter(pk__in=id_page_to_update).update(
             status=PAGE_STATUS_PENDING_VERIFICATION,
             last_verification=timezone.now()
         )
+        print("marked %d pages as being to be verified" % total)
 
     for page_id in id_page_to_update:
         verify_page(page_id)
@@ -82,7 +83,6 @@ def verify_stale_pages():
 @lock_task('index_pages')  # Goes *after* the task decorator.
 @db_periodic_task(crontab(minute="*/5"))
 def index_pages():
-
     max_pending = (60 / WAIT_BETWEEN_VALIDATION_SECONDS) * 5
     chunk_size = max_pending - TrackedPage.objects.filter(status=PAGE_STATUS_PENDING_INDEXATION_CALL).count()
     now = timezone.now()
@@ -97,7 +97,7 @@ def index_pages():
         )
 
         id_page_to_update = list(
-            filtered_page_queryset.select_for_update(skip_locked=True).values_list('id',flat=True)[:chunk_size]
+            filtered_page_queryset.select_for_update(skip_locked=True).values_list('id', flat=True)[:chunk_size]
         )
 
         TrackedPage.objects.filter(pk__in=id_page_to_update).update(
@@ -108,6 +108,7 @@ def index_pages():
     for page_id in id_page_to_update:
         index_page(page_id)
 
+
 @lock_task('refresh_sitemap')  # Goes *after* the task decorator.
 @db_periodic_task(crontab(minute="*/5"))
 def refresh_sitemap():
@@ -117,7 +118,6 @@ def refresh_sitemap():
     with transaction.atomic():
         for site in TrackedSite.objects.select_for_update().filter(
                 Q(status=SITE_STATUS_CREATED) | (Q(status=SITE_STATUS_OK) & Q(next_update__lte=timezone.now()))):
-
             print("going to update site ", site.id)
             site.status = SITE_STATUS_PENDING
             site.save()
@@ -144,7 +144,6 @@ def update_sitemap(site_id):
     urls = fetch_sitemap_links(site.sitemap_url)
     final_urls = set(urls)
     existing_urls = set(site.pages.all().values_list("url", flat=True))
-
 
     to_create = final_urls - existing_urls
 
@@ -181,7 +180,8 @@ def verify_page(page_id):
         with transaction.atomic():
             page: TrackedPage = TrackedPage.objects.filter(id=page_id).select_for_update().first()
 
-            if page is None or page.status not in (PAGE_STATUS_PENDING_VERIFICATION, PAGE_STATUS_PENDING_INDEXATION_WAIT):
+            if page is None or page.status not in (
+            PAGE_STATUS_PENDING_VERIFICATION, PAGE_STATUS_PENDING_INDEXATION_WAIT):
                 print("page is not marked for verification. skipping")
                 return
             apikey = get_available_apikey(timezone.now(), APIKEY_USAGE_VERIFICATION)
@@ -189,18 +189,27 @@ def verify_page(page_id):
             if apikey is None:
                 # page will be checked later
                 raise Exception("no more api key available")
+            try:
+                # this call may take some time, and will call heavy stuff
+                if page_is_indexed(page.url, apikey):
+                    print("page %s is indexed" % page.url)
+                    page.status = PAGE_STATUS_INDEXED
+                    page.next_verification = timezone.now() + datetime.timedelta(days=WAIT_VALIDATE_INDEXED_PAGE_DAYS)
 
-            # this call may take some time, and will call heavy stuff
-            if page_is_indexed(page.url, apikey):
-                print("page %s is indexed" % page.url)
-                page.status = PAGE_STATUS_INDEXED
-                page.next_verification = timezone.now() + datetime.timedelta(days=WAIT_VALIDATE_INDEXED_PAGE_DAYS)
+                else:
+                    print("page %s is not indexed" % page.url)
+                    page.status = PAGE_STATUS_NEED_INDEXATION
+                page.last_verification = timezone.now()
+                page.save()
+            except WebsiteExhausted:
+                print("website is exhausted")
+                TrackedPage.objects.filter(site=page.site, status=PAGE_STATUS_PENDING_VERIFICATION).update(status=PAGE_STATUS_CREATED)
+                site = page.site
 
-            else:
-                print("page %s is not indexed"% page.url)
-                page.status = PAGE_STATUS_NEED_INDEXATION
-            page.last_verification = timezone.now()
-            page.save()
+                site.next_verification = timezone.make_aware(datetime.datetime.combine(timezone.now().date() + datetime.timedelta(days=1), datetime.time(6, 0, 0)))
+                print("update site's next verification: %s" % site.next_verification)
+                site.save()
+
         # held the lock until the next usage of the resource can be done
         remaining = end_throttle - time.time()
         if remaining > 0:

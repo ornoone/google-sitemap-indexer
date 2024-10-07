@@ -29,6 +29,8 @@ class TrackedSite(models.Model):
     next_update = models.DateTimeField(null=True, blank=True)
     last_update = models.DateTimeField(null=True, blank=True)
 
+    next_verification = models.DateTimeField(null=True, blank=True)
+
     def get_pages_statistics(self):
         status_list = self.pages.values('status').annotate(total=Count("status")).order_by("-status")
         status_to_lib = dict(TrackedPage._meta.get_field('status').flatchoices)

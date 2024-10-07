@@ -4,3 +4,7 @@ class ApiKeyExpired(Exception):
 
 class ApiKeyInvalid(Exception):
     pass
+
+
+class WebsiteExhausted(Exception):
+    pass

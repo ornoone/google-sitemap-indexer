@@ -8,7 +8,7 @@ from django.db import transaction
 from django.db.models import Q, F
 from google.oauth2 import service_account
 
-from google_indexer.apps.indexer.exceptions import ApiKeyExpired, ApiKeyInvalid
+from google_indexer.apps.indexer.exceptions import ApiKeyExpired, ApiKeyInvalid, WebsiteExhausted
 from google_indexer.apps.indexer.models import ApiKey, APIKEY_VALID
 
 
@@ -57,6 +57,9 @@ def page_is_indexed(url, apikey):
     }
     response = requests.post(ENDPOINT, headers=headers, json=data)
     status_code = response.status_code
+    if status_code == 429:
+        # {'error': {'code': 429, 'message': 'Quota exceeded for sc-domain:apprendre-une-langue-etrangere.fr.', 'status': 'RESOURCE_EXHAUSTED'}}
+        raise WebsiteExhausted()
     if status_code != 200:
         print("error while using key %s to validate %s" % (apikey.name, url))
         print(response.json())

@@ -25,6 +25,9 @@ services:
       context: .
     container_name: google_indexer_backend
     restart: always
+    depends_on:
+      - database
+      - redis
     ports:
       - "8000:8000"
     networks:
@@ -45,6 +48,9 @@ services:
     ports: []
     healthcheck:
       disable: true
+    depends_on:
+      - database
+      - redis
 
   backend_migrate:
     <<: *backend
@@ -56,6 +62,8 @@ services:
     ports: []
     healthcheck:
       disable: true
+    depends_on:
+      - database
 
 
 
