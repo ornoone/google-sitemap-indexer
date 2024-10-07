@@ -23,7 +23,7 @@
                     {#                 style="background-color: var(--bs-content-bg); border-bottom: var(--bs-border-width) solid var(--bs-content-border-color);"#}
             >
                 <div class="container-fluid">
-                    <a class="navbar-brand" href="#">
+                    <a class="navbar-brand bold" href="#">
                         Google Indexer
                     </a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -35,14 +35,14 @@
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                             <li class="nav-item">
                                 <a class="nav-link {% block indexer_nav_active %}{% endblock %}"
-                                   href="{% url "indexer:site-list" %}">Websites list</a>
+                                   href="{% url "indexer:site-list" %}">🌐Websites list</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link {% block apikey_nav_active %}{% endblock %}"
-                                   href="{% url "indexer:apikey-list" %}">API Keys</a>
+                                   href="{% url "indexer:apikey-list" %}">🔑API Keys</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" aria-current="page" href="{% url 'admin:index' %}">Admin</a>
+                                <a class="nav-link" aria-current="page" href="{% url 'admin:index' %}">🛡️Admin</a>
                             </li>
                         </ul>
                     </div>
@@ -56,14 +56,14 @@
                     {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
                         <div class="alert alert-success" role="alert">
 
-                            <h5 class="alert-heading">success</h5>
+                            <h5 class="alert-heading">✅Success</h5>
                             {{ message }}
 
                         </div>
                     {% elif message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
                         <div class="alert alert-danger" role="alert">
 
-                            <h5 class="alert-heading">Error</h5>
+                            <h5 class="alert-heading">🚨Error</h5>
                             {{ message }}
 
                         </div>
