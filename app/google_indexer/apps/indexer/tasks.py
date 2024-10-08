@@ -55,7 +55,7 @@ def index_pages():
         filtered_page_queryset = TrackedPage.objects.filter(
             status=PAGE_STATUS_NEED_INDEXATION,
         ).exclude(site__status=SITE_STATUS_HOLD).order_by(
-            F("last_indexation").asc(null_first=True)
+            F("last_indexation").asc(nulls_first=True)
         )
 
         if not filtered_page_queryset.exists():
@@ -65,7 +65,7 @@ def index_pages():
                 status=PAGE_STATUS_INDEXED,
                 last_indexation__lte=last_validation_reindex
             ).exclude(site__status=SITE_STATUS_HOLD).order_by(
-                F("last_indexation").asc(null_first=True)
+                F("last_indexation").asc(nulls_first=True)
             )
 
         id_page_to_update = list(
