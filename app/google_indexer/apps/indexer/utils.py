@@ -8,7 +8,7 @@ from django.db import transaction
 from django.db.models import Q, F
 from google.oauth2 import service_account
 
-from google_indexer.apps.indexer.exceptions import ApiKeyExpired, ApiKeyInvalid, WebsiteExhausted
+from google_indexer.apps.indexer.exceptions import ApiKeyExpired, ApiKeyInvalid
 from google_indexer.apps.indexer.models import ApiKey, APIKEY_VALID
 
 
@@ -35,47 +35,6 @@ def fetch_sitemap_links(sitemap_url):
         urls = [url.text for url in root.findall(".//ns:loc", namespaces=namespace)]
 
     return urls
-
-
-def page_is_indexed(url, apikey):
-
-    SCOPES = ["https://www.googleapis.com/auth/webmasters.readonly"]
-    ENDPOINT = "https://searchconsole.googleapis.com/v1/urlInspection/index:inspect"
-
-    credentials = service_account.Credentials.from_service_account_info(apikey.content, scopes=SCOPES)
-    if not credentials.valid:
-        credentials.refresh(Request())
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {credentials.token}"
-    }
-    parsed = urllib.parse.urlparse(url)
-    data = {
-        "inspectionUrl": url + "abcd",
-        "siteUrl": f'sc-domain:{parsed.netloc}',
-        "languageCode": 'fr'
-    }
-    response = requests.post(ENDPOINT, headers=headers, json=data)
-    status_code = response.status_code
-    if status_code == 429:
-        # {'error': {'code': 429, 'message': 'Quota exceeded for sc-domain:apprendre-une-langue-etrangere.fr.', 'status': 'RESOURCE_EXHAUSTED'}}
-        raise WebsiteExhausted()
-    if status_code != 200:
-        print("error while using key %s to validate %s" % (apikey.name, url))
-        print(response.json())
-        return False
-    ###
-    ## result for indexed page
-    # {'inspectionResult': {'inspectionResultLink': 'https://search.google.com/search-console/inspect?resource_id=sc-domain:petandzen.fr&id=kVFLlIZalzpUTXztLe7VGw&utm_medium=link&utm_source=api', 'indexStatusResult': {'verdict': 'PASS', 'coverageState': 'Envoyée et indexée', 'robotsTxtState': 'ALLOWED', 'indexingState': 'INDEXING_ALLOWED', 'lastCrawlTime': '2024-10-06T07:09:51Z', 'pageFetchState': 'SUCCESSFUL', 'googleCanonical': 'https://petandzen.fr/garde-a-domicile-chien-chat-nac/ammerschwihr', 'userCanonical': 'https://petandzen.fr/garde-a-domicile-chien-chat-nac/ammerschwihr', 'sitemap': ['https://petandzen.fr/garde.xml', 'https://petandzen.fr/sitemap.xml'], 'referringUrls': ['https://petandzen.fr/garde.xml'], 'crawledAs': 'MOBILE'}, 'mobileUsabilityResult': {'verdict': 'VERDICT_UNSPECIFIED'}, 'richResultsResult': {'verdict': 'PASS', 'detectedItems': [{'richResultType': 'Fils d&#39;Ariane', 'items': [{'name': 'Élément sans nom'}]}, {'richResultType': 'Champ de recherche associé aux liens sitelink', 'items': [{'name': 'Élément sans nom'}]}]}}}
-
-    # result for non indexed page
-    # {'inspectionResult': {'inspectionResultLink': 'https://search.google.com/search-console/inspect?resource_id=sc-domain:petandzen.fr&id=tt9FEco9gzA6HcAG_GyhaQ&utm_medium=link&utm_source=api', 'indexStatusResult': {'verdict': 'NEUTRAL', 'coverageState': 'Google ne reconnaît pas cette URL', 'robotsTxtState': 'ROBOTS_TXT_STATE_UNSPECIFIED', 'indexingState': 'INDEXING_STATE_UNSPECIFIED', 'pageFetchState': 'PAGE_FETCH_STATE_UNSPECIFIED'}, 'mobileUsabilityResult': {'verdict': 'VERDICT_UNSPECIFIED'}}}
-    response_data = response.json()
-    try:
-        return response_data['inspectionResult']['indexStatusResult']['verdict'] == 'PASS'
-    except KeyError:
-        print_exc()
-        return False
 
 
 from google.auth.transport.requests import Request

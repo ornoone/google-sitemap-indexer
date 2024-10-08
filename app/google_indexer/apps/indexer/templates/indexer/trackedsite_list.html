@@ -54,6 +54,21 @@
                     <td>
                         <a class="btn btn-danger ms-auto" href="{% url "indexer:site-delete" pk=site.id %}">
                             Delete</a>
+                        {% if site.status == 'HOLD' %}
+                        <form method="post" action="{% url 'indexer:site-action' pk=object.id %}">
+                            {% csrf_token %}
+
+                            <input type="hidden" name="action" value="hold"/>
+                            <button class="btn btn-primary" type="submit">disable indexing</button>
+                        </form>
+                        {%  else %}
+                        <form method="post" action="{% url 'indexer:site-action' pk=object.id %}">
+                            {% csrf_token %}
+
+                            <input type="hidden" name="action" value="unhold"/>
+                            <button class="btn btn-primary" type="submit">resume indexing</button>
+                        </form>
+                        {% endif %}
                     </td>
                 {% endwith %}
             </tr>

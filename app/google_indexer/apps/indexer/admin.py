@@ -23,8 +23,12 @@ class TrackedPageAdmin(admin.ModelAdmin):
         "site",
         "url",
         "status",
-        "next_verification",
-        "last_verification",
+        "last_indexation",
+    )
+
+    search_fields = (
+        "site",
+        "status",
         "last_indexation",
     )
 
@@ -39,3 +43,9 @@ class ApiKeyAdmin(admin.ModelAdmin):
                     "max_per_day",
 
                     )
+
+    search_fields = (
+        "name",
+        "status",
+        "last_usage"
+    )

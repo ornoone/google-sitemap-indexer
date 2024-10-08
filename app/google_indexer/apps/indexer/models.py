@@ -6,14 +6,12 @@ from django.utils import timezone
 # Create your models here.
 SITE_STATUS_CREATED = "CREATED"
 SITE_STATUS_PENDING = "PENDING"
+SITE_STATUS_HOLD = 'HOLD'
 SITE_STATUS_OK = "OK"
 
 # Create your models here.
-PAGE_STATUS_CREATED = "0_CREATED"
-PAGE_STATUS_PENDING_VERIFICATION = "1_PENDING_VERIFICATION"
 PAGE_STATUS_NEED_INDEXATION = "2_NEED_INDEXATION"
 PAGE_STATUS_PENDING_INDEXATION_CALL = "3_PENDING_INDEXATION_CALL"
-PAGE_STATUS_PENDING_INDEXATION_WAIT = "4_PENDING_INDEXATION_WAIT"
 PAGE_STATUS_INDEXED = "5_INDEXED"
 
 
@@ -23,6 +21,7 @@ class TrackedSite(models.Model):
     status = models.CharField(max_length=255, choices=[
         (SITE_STATUS_CREATED, "created"),
         (SITE_STATUS_PENDING, "pending"),
+        (SITE_STATUS_HOLD, "hold"),
         (SITE_STATUS_OK, "up to date"),
     ], default=SITE_STATUS_CREATED)
 
@@ -53,21 +52,16 @@ class TrackedPage(models.Model):
     url = models.URLField(null=False, blank=False)
 
     # FSM:
-    # created -> pending verification ->  .....................................................................  |-> indexed
-    #                                 |-> need indexation -> pending indextation call -> pending indexation wait |
+    # created ->  .....................................................................  |-> indexed
+    #         |-> need indexation -> pending indextation call -> pending indexation wait |
 
 
     status = models.CharField(max_length=255, choices=[
-        (PAGE_STATUS_CREATED, "created"),
-        (PAGE_STATUS_PENDING_VERIFICATION, "pending verification"),
         (PAGE_STATUS_NEED_INDEXATION, "need indexation"),
         (PAGE_STATUS_PENDING_INDEXATION_CALL, "pending indexation call"),
-        (PAGE_STATUS_PENDING_INDEXATION_WAIT, "pending indexation by google"),
         (PAGE_STATUS_INDEXED, "indexed"),
-    ], default=PAGE_STATUS_CREATED)
+    ], default=PAGE_STATUS_NEED_INDEXATION)
 
-    next_verification = models.DateTimeField(null=True, blank=True)
-    last_verification = models.DateTimeField(null=True, blank=True)
     last_indexation = models.DateTimeField(null=True, blank=True)
 
 
