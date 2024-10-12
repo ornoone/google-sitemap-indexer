@@ -4,11 +4,14 @@
 
 
 {% block content %}
+
+
+
     <form action="" method="post">
         {% csrf_token %}
-        
-<div class="accordion accordion-flush" id="accordionFlushExample" style="margin-top: 15px;margin-bottom: 30px;">
-  <div class="accordion-item">
+  <h3 class="my-3">🌐Website Management</h3>      
+<div class="accordion accordion-flush my-3" id="accordionFlushExample" >
+  <div class="accordion-item style="border-bottom-width: 0px;">
     <h2 class="accordion-header">
       <button class="btn btn-outline-light collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
         ✚<strong>Add website</strong>
@@ -16,7 +19,7 @@
     </h2>
     <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
      
-         <div class="accordion-body"><div class="container">
+         <div class="accordion-body"><div class="container border border-light my-1 py-1">
          <div class="row row align-items-center"><div class="mb-3 col">
                 {{ form.name.errors }}
                 <label class="form-label" for="{{ form.name.id_for_label }}">🏷️Website Friendly Name</label>
