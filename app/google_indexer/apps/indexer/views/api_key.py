@@ -53,12 +53,15 @@ class ApiKeyListView(FormMixin, ListView, ProcessFormView):
 
 
     def get_context_data(self, **kwargs):
-       context = super().get_context_data(**kwargs)
-       # Ajouter les totaux des utilisations
-       usage_counts = ApiKey.total_usage_counts()
-       context['total_indexation_keys'] = usage_counts['total_indexation_keys']
-       context['total_check_keys'] = usage_counts['total_check_keys']
-       return context
+        context = super().get_context_data(**kwargs)
+        # Ajouter les totaux des utilisations
+        usage_counts = ApiKey.total_usage_counts()
+        context['total_indexation_keys'] = usage_counts['total_indexation_keys']
+        context['total_check_keys'] = usage_counts['total_check_keys']
+        # Ajouter les utilisations actuelles
+        context['used_indexation_keys'] = ApiKey.objects.filter(usage=APIKEY_USAGE_INDEXATION, count_of_the_day__gt=0).count()
+        context['used_check_keys'] = ApiKey.objects.filter(usage=APIKEY_USAGE_VERIFICATION, count_of_the_day__gt=0).count()
+        return context
 
 
 class ApiKeyDeleteView(DeleteView):
