@@ -75,8 +75,8 @@ class ApiKey(models.Model):
     name = models.CharField(max_length=255, null=False, blank=False)
 
     status = models.CharField(max_length=255, choices=[
-        (APIKEY_VALID, "valid"),
-        (APIKEY_INVALID, "invalid"),
+        (APIKEY_VALID, "✅Valid"),
+        (APIKEY_INVALID, "⛔Invalid"),
     ], default=APIKEY_VALID)
 
     usage = models.CharField(max_length=255, null=False, blank=False, default=APIKEY_USAGE_INDEXATION, choices=[
