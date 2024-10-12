@@ -1,3 +1,9 @@
+Test1 :
+
+
+
+
+
 {% extends "indexer/base.html" %}
 
 {% block apikey_nav_active %}active{% endblock apikey_nav_active %}
@@ -8,21 +14,30 @@
         {% csrf_token %}
         
         <h3 class="col mt-3">API Keys Management</h3>
-        
-        <div class="row align-items-center border border-light my-3 py-1">
+
+
+
+<div class="accordion accordion-flush my-2 py-1" id="accordionFlushExample">
+  <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button class="btn btn-outline-light collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+        ✚<strong>Upload new keys</strong>
+      </button>
+    </h2>
+    <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+     
+         <div class="accordion-body"> <div class="row align-items-center border border-light my-1 py-1">
 
             <div class="col ">
                 <label for="{{ form.file.id_for_label }}" class="form-label">🔑Upload new keys</label>
                 <input class="form-control" multiple=true type="file" id="{{ form.file.id_for_label }}"
                        name="{{ form.file.html_name }}">
-            
-
             </div>
 
 
 
             
-            <div class="col border border-light">
+            <div class="col">
 
                 <label class="form-label">Usage</label>
                 {% for value, name in form.usage.field.choices %}
@@ -38,19 +53,25 @@
                 {% endfor %}
             </div>
             <div class="col">
-                <button type="submit" class="btn btn-outline-succes ms-auto">Add keys</button>
+                <button type="submit" class="btn btn-outline-success ms-auto">Add keys</button>
             </div>
         </div>
+         </div>
+    </div>
+  </div>
+</div>        
+        
+       
     </form>
     <table class="table">
         <thead>
         <tr>
-            <th scope="col">Name</th>
-            <th scope="col">Usage</th>
-            <th scope="col">Last usage</th>
-            <th scope="col">Status</th>
-            <th scope="col">Key Usage Rate</th>
-            <th scope="col">Delete</th>
+            <th scope="col">🏷️Name</th>
+            <th scope="col">➡️Usage</th>
+            <th scope="col">🕒Last Usage</th>
+            <th scope="col">🔍Status</th>
+            <th scope="col">📈Key Usage Rate</th>
+            <th scope="col">🗑️Delete</th>
         </tr>
         </thead>
         <tbody>
