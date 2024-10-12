@@ -5,11 +5,11 @@
 
 
 {% block content %}
-    <div>Êtes-vous sûr de vouloir supprimer la clé {{ object.name }} ?</div>
+    <div>🗑️ Êtes-vous sûr de vouloir supprimer la clé {{ object.name }} ?</div>
     <form action="" method="post">
     {% csrf_token %}
-        <button class="btn bg-danger">oui</button>
-        <a href="{% url "indexer:apikey-list" %}" class="btn btn-primary">non</a>
+        <button class="btn bg-outline-danger">☠️Oui</button>
+        <a href="{% url "indexer:apikey-list" %}" class="btn btn-outline-success">❌ Non</a>
     </form>
 
 {% endblock content %}
