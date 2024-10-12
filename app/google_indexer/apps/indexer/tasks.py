@@ -43,7 +43,7 @@ def chunks(lst, n):
 @db_periodic_task(crontab(minute="*/5"))
 def index_pages():
     max_pending = (60 / WAIT_BETWEEN_VALIDATION_SECONDS) * 5
-    chunk_size = max_pending - TrackedPage.objects.filter(status=PAGE_STATUS_PENDING_INDEXATION_CALL).count()
+    chunk_size = max(0, max_pending - TrackedPage.objects.filter(status=PAGE_STATUS_PENDING_INDEXATION_CALL).count())
     now = timezone.now()
     if not has_available_apikey(now):
         print("no more available apikeys for today, skipping execution")
