@@ -62,7 +62,7 @@
                     <td>{{ site.get_status_display }}</td>
                     <td>{{ statistics.by_statuses.5_INDEXED|default:0 }}</td>
                     <td>{{ statistics.total}}</td>                    
-                    <td class="d-grid">
+                    <td>
                        
                         {% if site.status == 'HOLD' %}
                             <form method="post" action="{% url 'indexer:site-action' pk=site.id %}">
