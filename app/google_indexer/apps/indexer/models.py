@@ -84,15 +84,7 @@ class ApiKey(models.Model):
          (APIKEY_USAGE_VERIFICATION, "✅Checking"),
     ])
 
-def get_status_display_with_style(self):
-        # Utiliser format_html pour renvoyer du HTML en toute sécurité
-        if self.status == APIKEY_VALID:
-            return format_html('<span style="color: green;">{}</span>', "✅Valid")
-        elif self.status == APIKEY_INVALID:
-            return format_html('<span style="color: red;">{}</span>', "⛔Invalid")
-        return self.get_status_display()
 
-    
     content = models.JSONField(null=False, blank=False)
     last_usage = models.DateTimeField(null=True, blank=True)
     count_of_the_day = models.IntegerField(default=0)
