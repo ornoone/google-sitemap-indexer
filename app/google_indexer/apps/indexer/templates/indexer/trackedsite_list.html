@@ -62,14 +62,14 @@
                     <td>{{ site.get_status_display }}</td>
                     <td>{{ statistics.by_statuses.5_INDEXED|default:0 }}</td>
                     <td>{{ statistics.total}}</td>                    
-                    <td>
+                    <td class="d-grid">
                        
                         {% if site.status == 'HOLD' %}
                             <form method="post" action="{% url 'indexer:site-action' pk=site.id %}">
                                 {% csrf_token %}
 
                                 <input type="hidden" name="action" value="unhold"/>
-                                <button class="btn btn-primary" type="submit">▶️Resume indexing</button>
+                                <button class="btn btn-outline-primary" type="submit">▶️Resume indexing</button>
                             </form>
 
                         {% else %}
@@ -77,7 +77,7 @@
                                 {% csrf_token %}
 
                                 <input type="hidden" name="action" value="hold"/>
-                                <button class="btn btn-warning" type="submit">⏸️Disable</button>
+                                <button class="btn btn-outline-warning" type="submit">⏸️Disable</button>
                             </form>
                         {% endif %}
                          <a class="btn btn-danger ms-auto" href="{% url "indexer:site-delete" pk=site.id %}">
