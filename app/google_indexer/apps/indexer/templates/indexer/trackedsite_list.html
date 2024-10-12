@@ -35,8 +35,8 @@
             <th scope="col">🌐Website</th>
             <th scope="col">🗺️Sitemap</th>
             <th scope="col">⚙️Status</th>
+            <th scope="col">🚀Sending</th>
             <th scope="col">📄Total pages</th>
-            <th scope="col">🔍Detail</th>
             <th scope="col">🛠️Actions</th>
         </tr>
         </thead>
@@ -47,10 +47,8 @@
                     <th scope="row"><a href="{% url "indexer:site-detail" site.id %}">{{ site.name }}</a></th>
                     <td>{{ site.sitemap_url }}</td>
                     <td>{{ site.get_status_display }}</td>
-                    <td>0</td>
-                    <td>
-                        {{ statistics.by_statuses.5_INDEXED|default:0 }} / {{ statistics.total }}
-                    </td>
+                    <td>{{ statistics.by_statuses.5_INDEXED|default:0 }}</td>
+                    <td>{{ statistics.total}}</td>                    
                     <td>
                         <a class="btn btn-danger ms-auto" href="{% url "indexer:site-delete" pk=site.id %}">
                             🗑️Delete</a>
@@ -67,7 +65,7 @@
                                 {% csrf_token %}
 
                                 <input type="hidden" name="action" value="hold"/>
-                                <button class="btn btn-warning" type="submit">🚫Disable indexing</button>
+                                <button class="btn btn-warning" type="submit">⏸️Disable</button>
                             </form>
                         {% endif %}
                     </td>
