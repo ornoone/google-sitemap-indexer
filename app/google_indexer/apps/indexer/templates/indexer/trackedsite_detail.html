@@ -9,10 +9,10 @@
     <h2 class="my-3">
         {{ object.name }} ({{ object.get_status_display }})
     </h2>
-    <div class="d-grid gap-1">
-        <div class="p-2">🔄 Last update : {{ object.last_update }}</div>
-        <div class="p-2">⏭️ Next update :  {{ object.next_update }}</div>
-        <div class="p-2">🔒Validation not before :  {{ object.next_verification }}</div>
+    <div class="d-grid gap-1 my-3">
+        <div>🔄 Last update : {{ object.last_update }}</div>
+        <div>⏭️ Next update :  {{ object.next_update }}</div>
+        <div>🔒Validation not before :  {{ object.next_verification }}</div>
     </div>
 
     <div class="row my-2">
