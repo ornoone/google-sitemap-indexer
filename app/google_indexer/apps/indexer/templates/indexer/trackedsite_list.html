@@ -50,8 +50,7 @@
                     <td>{{ statistics.by_statuses.5_INDEXED|default:0 }}</td>
                     <td>{{ statistics.total}}</td>                    
                     <td>
-                        <a class="btn btn-danger ms-auto" href="{% url "indexer:site-delete" pk=site.id %}">
-                            🗑️Delete</a>
+                       
                         {% if site.status == 'HOLD' %}
                             <form method="post" action="{% url 'indexer:site-action' pk=site.id %}">
                                 {% csrf_token %}
@@ -68,6 +67,8 @@
                                 <button class="btn btn-warning" type="submit">⏸️Disable</button>
                             </form>
                         {% endif %}
+                         <a class="btn btn-danger ms-auto" href="{% url "indexer:site-delete" pk=site.id %}">
+                            🗑️Delete</a>
                     </td>
                 {% endwith %}
             </tr>
