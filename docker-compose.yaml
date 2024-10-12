@@ -23,7 +23,6 @@ services:
   backend: &backend
     build:
       context: .
-    container_name: google_indexer_backend
     restart: always
     depends_on:
       - database
@@ -39,8 +38,9 @@ services:
 
   backend_huey:
     <<: *backend
-    container_name: google_indexer_huey
     restart: always
+    deploy:
+      replicas: 2
 
     environment:
       START: huey
