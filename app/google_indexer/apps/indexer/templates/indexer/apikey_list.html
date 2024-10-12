@@ -76,8 +76,7 @@
                 <td>{{ apikey.count_today }} / {{ apikey.max_per_day }}</td>
 
                 <td>
-                    <a class="btn btn-outline-danger ms-auto" href="{% url "indexer:apikey-delete" pk=apikey.id %}">
-                        delete</a>
+                    <a class="btn btn-outline-danger ms-auto" href="{% url "indexer:apikey-delete" pk=apikey.id %}">Delete</a>
                 </td>
             </tr>
         {% endfor %}
