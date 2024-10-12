@@ -7,7 +7,7 @@
     <form action="" method="post">
         {% csrf_token %}
         
-            <div class="accordion accordion-flush" id="accordionFlushExample" style="margin-top: 15px;margin-bottom: 30px;">
+<div class="accordion accordion-flush" id="accordionFlushExample" style="margin-top: 15px;margin-bottom: 30px;">
   <div class="accordion-item">
     <h2 class="accordion-header">
       <button class="btn btn-outline-light collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
@@ -15,9 +15,9 @@
       </button>
     </h2>
     <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
-     <div class="container text-center">
+     <div class="container">
          <div class="row align-items-center">
-         <div class="accordion-body"><div class="mb-3 col">
+         <div class="accordion-body"><div class="mb-3 col-6">
                 {{ form.name.errors }}
                 <label class="form-label" for="{{ form.name.id_for_label }}">🏷️Website Friendly Name</label>
                 <input name="{{ form.name.html_name }}" type="text" class="form-control"
@@ -25,7 +25,7 @@
 
             </div>
 
-            <div class="mb-3 col">
+            <div class="mb-3 col-6">
                 {{ form.sitemap_url.errors }}
 
                 <label class="form-label" for="{{ form.sitemap_url.id_for_label }}">🔗Sitemap URL</label>
