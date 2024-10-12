@@ -21,14 +21,14 @@
             <form method="post" action="{% url 'indexer:site-action' pk=object.id %}">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="reset_pending"/>
-                <button class="btn btn-primary" type="submit">Reset pending tasks</button>
+                <button class="btn btn-primary" type="submit">🔄Reset pending tasks</button>
             </form>
         </div>
         <div class="col">
             <form method="post" action="{% url 'indexer:site-action' pk=object.id %}">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="update"/>
-                <button class="btn btn-light" type="submit">Force update sitemap</button>
+                <button class="btn btn-light" type="submit">🌐Force update sitemap</button>
             </form>
         </div>
 
@@ -36,7 +36,7 @@
             <form method="post" action="{% url 'indexer:site-action' pk=object.id %}">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="reset_pages"/>
-                <button class="btn btn-outline-danger" type="submit">Force reset all pages</button>
+                <button class="btn btn-outline-danger" type="submit">⚠️Reset all Pages</button>
             </form>
         </div>
     </div>
@@ -55,7 +55,7 @@
                      aria-valuemax="100"
                      style="width: {{ percent.2_NEED_INDEXATION|floatformat:"0" }}%"
 
-                     data-bs-toggle="tooltip" data-bs-title="need indexation"
+                     data-bs-toggle="tooltip" data-bs-title="📇Need Indexation"
                      data-filter=2_NEED_INDEXATION
                 >
                     <div class="progress-bar bg-warning">{{ page_statistics.by_statuses.2_NEED_INDEXATION|floatformat:"0" }}</div>
@@ -67,7 +67,7 @@
                      aria-valuemin="0"
                      aria-valuemax="100" style="width: {{ percent.3_PENDING_INDEXATION_CALL|floatformat:"0" }}%"
                      data-bs-toggle="tooltip"
-                     data-bs-title="pending indexation call"
+                     data-bs-title="⏳Pending indexation call"
                      data-filter="3_PENDING_INDEXATION_CALL"
                 >
                     <div class="progress-bar bg-light">{{ page_statistics.by_statuses.3_PENDING_INDEXATION_CALL|floatformat:"0" }}</div>
@@ -79,7 +79,7 @@
                      aria-valuemin="0"
                      aria-valuemax="100"
                      style="width: {{ percent.5_INDEXED|floatformat:"0" }}%"
-                     data-bs-toggle="tooltip" data-bs-title="indexed"
+                     data-bs-toggle="tooltip" data-bs-title="✅Indexed"
                      data-filter="5_INDEXED"
                 >
                     <div class="progress-bar bg-success">{{ page_statistics.by_statuses.5_INDEXED|floatformat:"0" }}</div>
@@ -92,10 +92,10 @@
     <table class="table">
         <thead>
         <tr>
-            <th scope="col">URL</th>
-            <th scope="col">Status</th>
-            <th scope="col">Last indexation</th>
-            <th scope="col">Actions</th>
+            <th scope="col">🔗URL</th>
+            <th scope="col">🔍Status</th>
+            <th scope="col">🗓️Last indexation</th>
+            <th scope="col">⚙️Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -109,7 +109,7 @@
                     <form method="post" action="{% url 'indexer:page-action' pk=page.id %}">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="index"/>
-                        <button class="btn btn-outline-danger" type="submit">Force indexation</button>
+                        <button class="btn btn-outline-danger" type="submit">⚡Force Indexation</button>
                     </form>
 
 
