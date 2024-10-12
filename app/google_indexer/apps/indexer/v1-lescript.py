@@ -197,7 +197,7 @@ def verify_links_indexation(input_file, driver_path, output_ko_file):
         time.sleep(delay)  # Décalage de 1 seconde entre chaque worker
         return is_url_indexed_selenium(url, driver_path)
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
         futures = []
         for i, url in enumerate(urls):
             futures.append(executor.submit(worker_function, url, i))  # Ajout du délai d'une seconde entre chaque worker
