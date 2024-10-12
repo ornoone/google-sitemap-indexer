@@ -12,6 +12,7 @@ from google_indexer.apps.indexer.models import ApiKey, APIKEY_USAGE_INDEXATION
 class ApiKeyListView(FormMixin, ListView, ProcessFormView):
     model = ApiKey
     form_class = ApikeyImportForm
+    queryset = ApiKey.objects.all().order_by('name')
 
     def get_success_url(self):
         return reverse('indexer:apikey-list')
@@ -53,6 +54,7 @@ class ApiKeyListView(FormMixin, ListView, ProcessFormView):
 
 class ApiKeyDeleteView(DeleteView):
     model = ApiKey
+
 
     def get_success_url(self):
         return reverse('indexer:apikey-list')

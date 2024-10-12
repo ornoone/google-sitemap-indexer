@@ -55,7 +55,7 @@
                 <th>{{ apikey.get_usage_display }}</th>
                 <td>{{ apikey.last_usage }}</td>
                 <td>{{ apikey.get_status_display }}</td>
-                <td>{{ apikey.count_of_the_day }} / {{ apikey.max_per_day }}</td>
+                <td>{{ apikey.count_today }} / {{ apikey.max_per_day }}</td>
 
                 <td>
                     <a class="btn btn-danger ms-auto" href="{% url "indexer:apikey-delete" pk=apikey.id %}">

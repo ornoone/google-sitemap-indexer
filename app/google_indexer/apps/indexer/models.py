@@ -92,3 +92,11 @@ class ApiKey(models.Model):
 
     def __str__(self):
         return f"ApiKey {self.id}. {self.last_usage} for {self.count_of_the_day}/{self.max_per_day}"
+
+    def count_today(self):
+        if self.last_usage is None:
+            return 0
+        elif self.last_usage.date() == timezone.now().date():
+            return self.count_of_the_day
+        else:
+            return 0
