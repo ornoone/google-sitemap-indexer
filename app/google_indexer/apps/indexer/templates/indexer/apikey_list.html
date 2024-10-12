@@ -8,6 +8,13 @@
         {% csrf_token %}
         
         <h3 class="my-3">🔑API Keys Management</h3>
+
+<div class="key-usage-summary">
+    <h3>Summary of API Key Usage</h3>
+    <p>Total keys for Indexation: {{ total_indexation_keys }}</p>
+    <p>Total keys for Verification: {{ total_check_keys }}</p>
+</div>
+        
 <div class="accordion accordion-flush my-2 py-1" id="accordionFlushExample">
   <div class="accordion-item">
     <h2 class="accordion-header">
