@@ -13,10 +13,7 @@ Test1 :
     <form action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         
-        <h3 class="col mt-3">API Keys Management</h3>
-
-
-
+        <h3 class="my-3">API Keys Management</h3>
 <div class="accordion accordion-flush my-2 py-1" id="accordionFlushExample">
   <div class="accordion-item">
     <h2 class="accordion-header">
@@ -85,7 +82,7 @@ Test1 :
                 <td>{{ apikey.count_today }} / {{ apikey.max_per_day }}</td>
 
                 <td>
-                    <a class="btn btn-danger ms-auto" href="{% url "indexer:apikey-delete" pk=apikey.id %}">
+                    <a class="btn btn-outline-danger ms-auto" href="{% url "indexer:apikey-delete" pk=apikey.id %}">
                         delete</a>
                 </td>
             </tr>
