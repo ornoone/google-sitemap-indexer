@@ -10,8 +10,7 @@
         <h3 class="my-3">🔑API Keys Management</h3>
 
 <div class="key-usage-summary">
-    <h3>Summary of API Key Usage</h3>
-    <p>⚡ Total keys for Indexation: {{ total_indexation_keys }} - ✅ Total keys for Verification: {{ total_check_keys }}</p>
+        <p>⚡ Total keys for Indexation: {{ total_indexation_keys }}</p>
 </div>
         
 <div class="accordion accordion-flush my-2 py-1" id="accordionFlushExample">
@@ -63,12 +62,12 @@
     <table class="table">
         <thead>
         <tr>
-            <th scope="col">🏷️Name</th>
-            <th scope="col">➡️Usage</th>
-            <th scope="col">🕒Last Usage</th>
-            <th scope="col">🔍Status</th>
-            <th scope="col">📈Key Usage Rate</th>
-            <th scope="col">🗑️Delete</th>
+            <th scope="col" classe="h4">🏷️Name</th>
+            
+            <th scope="col" classe="h4">🕒Last Usage</th>
+            <th scope="col" classe="h4">🔍Status</th>
+            <th scope="col" classe="h4">📈Key Usage Rate</th>
+            <th scope="col" classe="h4">🗑️Delete</th>
         </tr>
         </thead>
         <tbody>
@@ -76,7 +75,7 @@
             <tr>
 
                 <th>{{ apikey.name }}</th>
-                <th>{{ apikey.get_usage_display }}</th>
+                
                 <td>{{ apikey.last_usage }}</td>
                 <td>{{ apikey.get_status_display }}</td>
                 <td>{{ apikey.count_today }} / {{ apikey.max_per_day }}</td>
