@@ -47,7 +47,7 @@ class TrackedSite(models.Model):
     def __str__(self):
         return self.name
         
-    def get_domain(self):
+    def get_favicon_url(self):
         parsed_url = urlparse(self.sitemap_url)
         domain = parsed_url.netloc
         favicon_url = f"https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://{domain}&size=48"
