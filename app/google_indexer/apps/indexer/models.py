@@ -1,4 +1,4 @@
-
+from urllib.parse import urlparse
 from django.db import models
 from django.db.models import Count
 from django.utils import timezone
