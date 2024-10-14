@@ -189,3 +189,11 @@ def index_page(page_id):
 
     if retry:
         raise CancelExecution()
+
+@db_periodic_task(crontab(hour=6, minute=0))
+def reset_api_key_usage():
+    from google_indexer.apps.indexer.models import ApiKey
+
+    # Réinitialiser le compteur d'utilisation de chaque clé API
+    ApiKey.objects.all().update(count_of_the_day=0)
+    print("Clés API réinitialisées à 6h du matin")
