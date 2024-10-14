@@ -128,6 +128,6 @@ class ApiKey(models.Model):
     def total_usage_counts(cls):
         """Méthode pour calculer le nombre total de clés en fonction de l'usage"""
         total_indexation = cls.objects.filter(usage=APIKEY_USAGE_INDEXATION).count()
-            return {
+        return {
             'total_indexation_keys': total_indexation,           
         }
