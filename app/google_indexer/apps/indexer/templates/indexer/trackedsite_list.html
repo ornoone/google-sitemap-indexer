@@ -58,8 +58,8 @@
                 <a href="?sort={% if current_sort == 'sitemap_url' %}-sitemap_url{% else %}sitemap_url{% endif %}" class="text-decoration-none text-white">🗺️Sitemap</a>
             </th>
             <th scope="col" class="h4">⚙️Status</th>
-            <th scope="col" class="h4">🚀Sending</th>
-            <th scope="col" class="h4">📄Total pages</th>
+            <th scope="col" class="h4"><a href="?sort={% if current_sort == 'sending' %}-sending{% else %}sending{% endif %}" class="text-decoration-none text-white">🚀Sending</a></th>
+            <th scope="col" class="h4"><a href="?sort={% if current_sort == 'total' %}-total{% else %}total{% endif %}" class="text-decoration-none text-white">📄Total pages</a></th>
             <th scope="col" class="h4">🛠️Actions</th>
             <th scope="col" class="h4">🔍Outils</th>
         </tr>
