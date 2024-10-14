@@ -17,6 +17,12 @@ from google_indexer.apps.indexer.tasks import update_sitemap, index_page
 class TrackedSiteListView(FormMixin, ListView, ProcessFormView):
     model = TrackedSite
     form_class = TrackedSiteForm
+    
+    def get_queryset(self):
+        # Récupérer le paramètre de tri de la requête
+        sort = self.request.GET.get('sort', 'name')  # 'name' est la valeur par défaut
+        queryset = TrackedSite.objects.all().order_by(sort)
+        return queryset
 
     def post(self, request, *args, **kwargs):
         """
