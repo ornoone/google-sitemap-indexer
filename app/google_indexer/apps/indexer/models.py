@@ -60,6 +60,15 @@ class TrackedSite(models.Model):
         if domain:
             return f"https://search.google.com/search-console?hl=fr&resource_id=sc-domain:{domain}"
         return "#"
+    
+    def get_domain_url(self):
+        """Renvoie l'URL du domaine à partir de l'URL du sitemap"""
+        parsed_url = urlparse(self.sitemap_url)
+        domain = parsed_url.netloc
+        scheme = parsed_url.scheme
+        if domain and scheme:
+            return f"{scheme}://{domain}"
+        return "#"
 
 class TrackedPage(models.Model):
     site = models.ForeignKey(TrackedSite, on_delete=models.CASCADE, null=False, related_name="pages")
