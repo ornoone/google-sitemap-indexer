@@ -65,48 +65,51 @@
         </tr>
         </thead>
         <tbody>
-        {% for site in object_list %}
-            <tr class="align-middle">
-                {% with site.get_pages_statistics as statistics %}
-                <th scope="row">
-                    <a href="{% url "indexer:site-detail" site.id %}" class="h5 text-decoration-none text-white">
-                        <img src="{{ site.get_favicon_url }}" class="me-2" height="32" width="32">{{ site.name }}
-                    </a>
-                </th>
-                <td>{{ site.sitemap_url }}</td>
-                <td>{{ site.get_status_display }}</td>
-                <td>{{ statistics.by_statuses.5_INDEXED|default:0 }}</td>
-                <td>{{ statistics.total }}</td>                    
-                <td>
-                    {% if site.status == 'HOLD' %}
-                        <form method="post" action="{% url 'indexer:site-action' pk=site.id %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="unhold"/>
-                            <button class="btn btn-outline-primary" type="submit">▶️Resume indexing</button>
-                        </form>
-                    {% else %}
-                        <form method="post" action="{% url 'indexer:site-action' pk=site.id %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="hold"/>
-                            <button class="btn btn-outline-warning" type="submit">⏸️Disable</button>
-                        </form>
-                    {% endif %}
-                    <a class="btn btn-outline-danger ms-auto mt-1" href="{% url "indexer:site-delete" pk=site.id %}">🗑️Delete</a>
-                </td>
-                <td>
-                    <!-- Bouton Google Search Console -->
-                    <a href="{{ site.get_search_console_url|default:'#' }}" target="_blank" class="btn btn-outline-info" title="Google Search Console">📊</a>
+    {% for site in object_list %}
+        <tr class="align-middle">
+            {% with site.get_pages_statistics as statistics %}
+            <th scope="row">
+                <a href="{% url "indexer:site-detail" site.id %}" class="h5 text-decoration-none text-white">
+                    <img src="{{ site.get_favicon_url }}" class="me-2" height="32" width="32">{{ site.name }}
+                </a>
+            </th>
+            <td>{{ site.sitemap_url }}</td>
+            <td>{{ site.get_status_display }}</td>
+            <!-- Utiliser les annotations pour l'affichage -->
+            <td>{{ site.sending_pages }}</td>
+            <td>{{ site.total_pages }}</td>                    
+            <td>
+                {% if site.status == 'HOLD' %}
+                    <form method="post" action="{% url 'indexer:site-action' pk=site.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="unhold"/>
+                        <button class="btn btn-outline-primary" type="submit">▶️Resume indexing</button>
+                    </form>
+                {% else %}
+                    <form method="post" action="{% url 'indexer:site-action' pk=site.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="hold"/>
+                        <button class="btn btn-outline-warning" type="submit">⏸️Disable</button>
+                    </form>
+                {% endif %}
+                <a class="btn btn-outline-danger ms-auto mt-1" href="{% url "indexer:site-delete" pk=site.id %}">🗑️Delete</a>
+            </td>
+            <td>
+                <!-- Bouton Google Search Console -->
+                <a href="{{ site.get_search_console_url|default:'#' }}" target="_blank" class="btn btn-outline-info" title="Google Search Console">📊</a>
 
-                    <!-- Bouton Accès Direct au Site -->
-                    <a href="{{ site.get_domain_url }}" target="_blank" class="btn btn-outline-primary" title="Accéder au site">🌐</a>
+                <!-- Bouton Accès Direct au Site -->
+                <a href="{{ site.get_domain_url }}" target="_blank" class="btn btn-outline-primary" title="Accéder au site">🌐</a>
 
-                    <!-- Troisième Bouton avec Lien '#' -->
-                    <a href="#" class="btn btn-outline-secondary" title="Outil à venir">🔧</a>
-                </td>
-                {% endwith %}
-            </tr>
-        {% endfor %}
-        </tbody>
+                <!-- Troisième Bouton avec Lien '#' -->
+                <a href="#" class="btn btn-outline-secondary" title="Outil à venir">🔧</a>
+            </td>
+            {% endwith %}
+        </tr>
+    {% endfor %}
+</tbody>
+
+
     </table>
 {% endwith %}
 
