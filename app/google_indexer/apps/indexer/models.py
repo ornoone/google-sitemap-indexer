@@ -53,6 +53,14 @@ class TrackedSite(models.Model):
         favicon_url = f"https://logo.clearbit.com/{domain}"
         return favicon_url
 
+    def get_search_console_url(self):
+        """Renvoie l'URL de Google Search Console pour ce domaine"""
+        parsed_url = urlparse(self.sitemap_url)
+        domain = parsed_url.netloc
+        if domain:
+            return f"https://search.google.com/search-console?hl=fr&resource_id=sc-domain:{domain}"
+        return "#"
+
 class TrackedPage(models.Model):
     site = models.ForeignKey(TrackedSite, on_delete=models.CASCADE, null=False, related_name="pages")
     url = models.URLField(null=False, blank=False)
