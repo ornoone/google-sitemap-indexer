@@ -73,9 +73,8 @@
             </th>
             <td>{{ site.sitemap_url }}</td>
             <td>{{ site.get_status_display }}</td>
-            <!-- Utiliser les annotations pour l'affichage -->
-            <td>{{ site.sending_pages }}</td>
-            <td>{{ site.total_pages }}</td>                    
+            <td>{{ statistics.by_statuses.5_INDEXED|default:0 }}</td>
+            <td>{{ statistics.total}}</td>                    
             <td>
                 {% if site.status == 'HOLD' %}
                     <form method="post" action="{% url 'indexer:site-action' pk=site.id %}">
