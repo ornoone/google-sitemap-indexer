@@ -110,10 +110,3 @@ class ApiKey(models.Model):
             'total_indexation_keys': total_indexation,
             'total_check_keys': total_check,
         }
-
-    @classmethod
-    def get_available_api_key_count(cls):
-        # Filtrer les clés disponibles et renvoyer le nombre
-        available_keys = cls.objects.filter(count_of_the_day__lt=F('max_per_day')).count()
-        print(f"Number of API keys available today: {available_keys}")
-        return available_keys
