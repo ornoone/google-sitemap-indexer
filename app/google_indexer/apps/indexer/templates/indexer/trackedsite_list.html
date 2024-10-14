@@ -60,7 +60,7 @@
         {% for site in object_list %}
             <tr class="align-middle">
                 {% with site.get_pages_statistics as statistics %}
-                    <th scope="row"><a href="{% url "indexer:site-detail" site.id %}" class="h5 text-decoration-none text-white">{{ site.name }}</a></th>
+                    <th scope="row"><a href="{% url "indexer:site-detail" site.id %}" class="h5 text-decoration-none text-white"><img src="{{ site.get_favicon_url }}" alt="Favicon de {{ site.name }}">{{ site.name }}</a></th>
                     <td>{{ site.sitemap_url }}</td>
                     <td>{{ site.get_status_display }}</td>
                     <td>{{ statistics.by_statuses.5_INDEXED|default:0 }}</td>
