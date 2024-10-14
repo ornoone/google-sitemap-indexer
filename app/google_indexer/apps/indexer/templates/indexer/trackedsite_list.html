@@ -54,6 +54,7 @@
             <th scope="col" class="h4">🚀Sending</th>
             <th scope="col" class="h4">📄Total pages</th>
             <th scope="col" class="h4">🛠️Actions</th>
+            <th scope="col" class="h4">🔍Search Console</th>
         </tr>
         </thead>
         <tbody>
@@ -86,6 +87,9 @@
                          <a class="btn btn-outline-danger ms-auto mt-1" href="{% url "indexer:site-delete" pk=site.id %}">
                             🗑️Delete</a>
                     </td>
+                 <td>
+                    <a href="{{ site.get_search_console_url }}" target="_blank" class="btn btn-outline-info">🔍 Google Search Console</a>
+                 </td>
                 {% endwith %}
             </tr>
         {% endfor %}
