@@ -57,12 +57,7 @@ class ApiKeyListView(FormMixin, ListView, ProcessFormView):
         # Ajouter les totaux des utilisations
         usage_counts = ApiKey.total_usage_counts()
         context['total_indexation_keys'] = usage_counts['total_indexation_keys']
-        context['total_check_keys'] = usage_counts['total_check_keys']
-               
-        # Ajouter le nombre de clés API disponibles aujourd'hui
-        available_keys_count = ApiKey.get_available_api_key_count()
-        context['available_keys_count'] = available_keys_count
-        
+        context['total_check_keys'] = usage_counts['total_check_keys']       
         return context
 
 
