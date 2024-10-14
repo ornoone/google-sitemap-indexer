@@ -20,8 +20,26 @@ class TrackedSiteListView(FormMixin, ListView, ProcessFormView):
     
     def get_queryset(self):
         # Récupérer le paramètre de tri de la requête
-        sort = self.request.GET.get('sort', 'name')  # 'name' est la valeur par défaut
-        queryset = TrackedSite.objects.all().order_by(sort)
+        sort = self.request.GET.get('sort', 'name')  # 'name' est la valeur par défaut si aucun tri n'est défini
+
+        # Annoter le queryset avec le nombre total de pages et le nombre de pages envoyées (indexées)
+        queryset = TrackedSite.objects.annotate(
+            total_pages=Count('pages'),
+            sending_pages=Count('pages', filter=Q(pages__status='5_INDEXED'))
+        )
+
+        # Gérer le tri dynamique
+        if sort == 'sending':
+            queryset = queryset.order_by('sending_pages')
+        elif sort == '-sending':
+            queryset = queryset.order_by('-sending_pages')
+        elif sort == 'total':
+            queryset = queryset.order_by('total_pages')
+        elif sort == '-total':
+            queryset = queryset.order_by('-total_pages')
+        else:
+            queryset = queryset.order_by(sort)
+
         return queryset
 
     def post(self, request, *args, **kwargs):
