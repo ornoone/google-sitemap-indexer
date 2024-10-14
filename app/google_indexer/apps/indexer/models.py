@@ -46,6 +46,10 @@ class TrackedSite(models.Model):
 
     def __str__(self):
         return self.name
+        
+    def get_domain(self):
+        parsed_url = urlparse(self.sitemap_url)
+        return parsed_url.netloc
 
 class TrackedPage(models.Model):
     site = models.ForeignKey(TrackedSite, on_delete=models.CASCADE, null=False, related_name="pages")
