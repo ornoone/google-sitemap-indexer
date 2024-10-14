@@ -50,7 +50,7 @@ class TrackedSite(models.Model):
     def get_favicon_url(self):
         parsed_url = urlparse(self.sitemap_url)
         domain = parsed_url.netloc
-        favicon_url = f"https://logo.clearbit.com/{domain}"
+        favicon_url = f"https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://{domain}&size=32"
         return favicon_url
 
     def get_search_console_url(self):
