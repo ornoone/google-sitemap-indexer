@@ -8,10 +8,7 @@ import datetime
 import json
 from google.oauth2 import service_account
 from google.auth.transport.requests import Request
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-import msvcrt  # Pour attendre qu'une touche soit appuyée sous Windows
+
 
 # Variables pour la soumission à l'API Google
 SCOPES = ["https://www.googleapis.com/auth/indexing"]
@@ -149,82 +146,6 @@ def extract_sitemap_links_from_file(sitemap_file, output_file):
 
     print(f"\nExtraction complète. Liens enregistrés dans {output_file}.")
 
-# Fonction pour vérifier si une URL est indexée et gérer le CAPTCHA (Étape 2)
-def is_url_indexed_selenium(url, driver_path, headless=True):
-    chrome_options = Options()
-    if headless:
-        chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--blink-settings=imagesEnabled=false")
-    chrome_options.add_argument('--log-level=3')
-    chrome_options.add_argument("--window-size=800,200")  # Taille de la fenêtre
-
-    service = Service(driver_path)
-    driver = webdriver.Chrome(service=service, options=chrome_options)
-    search_url = f"https://www.google.com/search?q=site:{url}"
-    driver.get(search_url)
-    time.sleep(2)
-
-    page_source = driver.page_source
-
-    # Détection du CAPTCHA dans le contenu de la page
-    if "recaptcha" in page_source or "captcha" in page_source:
-        print(f"\nCAPTCHA détecté pour {url}. Votre IP publique est probablement bloquée.")
-        driver.quit()
-        print("Changez d'IP, puis appuyez sur une touche pour fermer le script.")
-        msvcrt.getch()  # Attend qu'une touche soit appuyée avant de fermer
-        sys.exit(1)  # Sortie du script en cas de CAPTCHA détecté
-
-    if "Aucun document ne correspond aux termes de recherche spécifiés" in page_source:
-        return (url, False)
-    else:
-        return (url, True)
-
-    driver.quit()
-
-# Vérifier les URLs non indexées
-def verify_links_indexation(input_file, driver_path, output_ko_file):
-    with open(input_file, 'r') as file:
-        urls = [line.strip() for line in file.readlines()]
-
-    non_indexed_urls = []
-    total_urls = len(urls)
-    start_time = time.time()
-
-    def worker_function(url, delay):
-        time.sleep(delay)  # Décalage de 1 seconde entre chaque worker
-        return is_url_indexed_selenium(url, driver_path)
-
-    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-        futures = []
-        for i, url in enumerate(urls):
-            futures.append(executor.submit(worker_function, url, i))  # Ajout du délai d'une seconde entre chaque worker
-
-        for i, future in enumerate(concurrent.futures.as_completed(futures), 1):
-            url, is_indexed = future.result()
-            if not is_indexed:
-                non_indexed_urls.append(url)
-
-            elapsed_time = time.time() - start_time
-            remaining_time = (elapsed_time / i) * (total_urls - i)
-            percentage = (i / total_urls) * 100
-            elapsed_time_str = str(datetime.timedelta(seconds=int(elapsed_time)))
-            remaining_time_str = str(datetime.timedelta(seconds=int(remaining_time)))
-
-            sys.stdout.write(
-                f"\r[Étape 2] Liens vérifiés : {i}/{total_urls} ({percentage:.2f}%)"
-                f" | KO: {len(non_indexed_urls)}"
-                f" | Temps écoulé : {elapsed_time_str} | Temps restant estimé : {remaining_time_str}"
-            )
-            sys.stdout.flush()
-
-    with open(output_ko_file, 'w') as file_ko:
-        for url in non_indexed_urls:
-            file_ko.write(f"{url}\n")
-
-    print(f"\nVérification terminée. Liens KO enregistrés dans {output_ko_file}.")
 
 # Soumission des liens non indexés (KO) à Google avec rotation des clés JSON (Étape 3)
 def submit_links_to_google(input_file):
@@ -280,38 +201,3 @@ def submit_links_to_google(input_file):
         write_urls_to_file(remaining_urls, PAS_DE_SLOT_FILE)
         print(f"\n{len(remaining_urls)} URLs non soumises par manque de slots. Voir {PAS_DE_SLOT_FILE}.")
 
-# Fonction principale pour demander l'étape et enchaîner automatiquement
-def main():
-    print("Choisissez une étape:")
-    print("1. Extraction des liens de sitemap")
-    print("2. Vérification de l'indexation")
-    print("3. Soumission des liens non indexés")
-    
-    choix = input("Entrez le numéro de l'étape (1, 2 ou 3): ")
-
-    if choix == '1':
-        # Étape 1 : Extraction des liens du sitemap
-        sitemap_file = os.path.join(BASE_DIR, "sitemapdessiteuxhumana.txt")
-        output_file = os.path.join(BASE_DIR, "all_sitemap_links.txt")
-        extract_sitemap_links_from_file(sitemap_file, output_file)
-        # Enchaîner les étapes suivantes
-        choix = '2'
-
-    if choix == '2':
-        # Étape 2 : Vérification de l'indexation
-        input_file = os.path.join(BASE_DIR, "all_sitemap_links.txt")
-        driver_path = r"C:\chromedriver\chromedriver.exe"  # Ajustez le chemin
-        output_ko_file = os.path.join(BASE_DIR, "liens_ko_google.txt")
-        verify_links_indexation(input_file, driver_path, output_ko_file)
-        # Enchaîner avec l'étape 3
-        choix = '3'
-
-    if choix == '3':
-        # Étape 3 : Soumission des liens non indexés
-        input_file = os.path.join(BASE_DIR, "liens_ko_google.txt")
-        submit_links_to_google(input_file)
-    else:
-        print("Choix invalide. Veuillez relancer le script et entrer un numéro valide.")
-
-if __name__ == "__main__":
-    main()
