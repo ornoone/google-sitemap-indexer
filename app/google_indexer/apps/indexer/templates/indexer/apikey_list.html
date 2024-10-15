@@ -1,115 +1,135 @@
 {% extends "indexer/base.html" %}
 
-{% block indexer_nav_active %}active{% endblock indexer_nav_active %}
+{% block apikey_nav_active %}active{% endblock apikey_nav_active %}
 
 
 {% block content %}
-
-
-
-    <form action="" method="post">
+    <form action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-  <h3 class="my-3">🌐Website Management</h3>      
-<div class="accordion accordion-flush my-3" id="accordionFlushExample" >
-  <div class="accordion-item style="border-bottom-width: 0px;">
+        
+        <h3 class="my-3">🔑API Keys Management</h3>
+
+<div class="key-usage-summary">
+        <p class="h4">⚡ Total keys for Indexation: <strong>{{ total_indexation_keys }}</strong><br/><span class="h5">
+</div>
+        
+<div class="accordion accordion-flush my-2 py-1" id="accordionFlushExample">
+  <div class="accordion-item">
     <h2 class="accordion-header">
       <button class="btn btn-outline-light collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
-        ✚<strong>Add website</strong>
+        ✚<strong>Upload new keys</strong>
       </button>
     </h2>
     <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
      
-         <div class="accordion-body"><div class="container border border-light my-1 py-1">
-         <div class="row row align-items-center"><div class="mb-3 col">
-                {{ form.name.errors }}
-                <label class="form-label" for="{{ form.name.id_for_label }}">🏷️Website Friendly Name</label>
-                <input name="{{ form.name.html_name }}" type="text" class="form-control"
-                       id="{{ form.name.id_for_label }}" required placeholder="my website">
+         <div class="accordion-body"> <div class="row align-items-center border border-light my-1 py-1">
 
+            <div class="col ">
+                <label for="{{ form.file.id_for_label }}" class="form-label">🔑Upload new keys</label>
+                <input class="form-control" multiple=true type="file" id="{{ form.file.id_for_label }}"
+                       name="{{ form.file.html_name }}">
             </div>
 
-            <div class="mb-3 col">
-                {{ form.sitemap_url.errors }}
 
-                <label class="form-label" for="{{ form.sitemap_url.id_for_label }}">🔗Sitemap URL</label>
-                <input name="{{ form.sitemap_url.html_name }}" type="url" class="form-control"
-                       id="{{ form.sitemap_url.id_for_label }}" required placeholder="https://mysite.com/sitemap.xml">
 
+            
+            <div class="col">
+
+                <label class="form-label">Usage</label>
+                {% for value, name in form.usage.field.choices %}
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" value="{{ value }}"
+                               name="{{ form.usage.html_name }}"
+                                {% if forloop.first %} checked {% endif %}
+                               id="id_{{ form.field_name.name }}_{{ forloop.counter0 }}">
+                        <label class="form-check-label"
+                               for="id_{{ form.field_name.name }}_{{ forloop.counter0 }}">{{ name }}</label>
+
+                    </div>
+                {% endfor %}
             </div>
             <div class="col">
-                <button type="submit" class="btn btn-outline-success ms-auto">✚ Add website</button>
-            </div></div>
+                <button type="submit" class="btn btn-outline-success ms-auto">✚ Add keys</button>
+            </div>
+        </div>
+         </div>
     </div>
   </div>
-</div>
-
-        </div>
+</div>        
+       
+       
     </form>
-{% with request.GET.sort as current_sort %}
-    <table class="table" style="margin-top:25px;">
+    <table class="table">
         <thead>
         <tr>
-            <!-- Lien pour trier par 'name' (croissant ou décroissant) -->
-            <th scope="col" class="h4">
-                <a href="?sort={% if current_sort == 'name' %}-name{% else %}name{% endif %}" class="text-decoration-none text-white">🌐Website</a>
-            </th>
+            <th scope="col" classe="h4">🏷️Name</th>
             
-            <th scope="col" class="h4">🗺️Sitemap</a></th>
-            <th scope="col" class="h4">⚙️Status</th>
-            <th scope="col" class="h4">🚀Sending</th>
-            <th scope="col" class="h4">📄Total pages</th>
-            <th scope="col" class="h4">🛠️Actions</th>
-            <th scope="col" class="h4">🔍Outils</th>
+            <th scope="col" classe="h4">🕒Last Usage</th>
+            <th scope="col" classe="h4">🔍Status</th>
+            <th scope="col" classe="h4">📈Key Usage Rate</th>
+            <th scope="col" classe="h4">🗑️Delete</th>
         </tr>
         </thead>
         <tbody>
-    {% for site in object_list %}
-        <tr class="align-middle">
-            {% with site.get_pages_statistics as statistics %}
-            <th scope="row">
-                <a href="{% url "indexer:site-detail" site.id %}" class="h5 text-decoration-none text-white">
-                    <img src="{{ site.get_favicon_url }}" class="me-2" height="32" width="32">{{ site.name }}
-                </a>
-            </th>
-            <td>{{ site.sitemap_url }}</td>
-            <td>{{ site.get_status_display }}</td>
-            <td>{{ statistics.by_statuses.5_INDEXED|default:0 }}</td>
-            <td>{{ statistics.total}}</td>                    
-            <td>
-                {% if site.status == 'HOLD' %}
-                    <form method="post" action="{% url 'indexer:site-action' pk=site.id %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="unhold"/>
-                        <button class="btn btn-outline-primary" type="submit">▶️Resume indexing</button>
-                    </form>
-                {% else %}
-                    <form method="post" action="{% url 'indexer:site-action' pk=site.id %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="hold"/>
-                        <button class="btn btn-outline-warning" type="submit">⏸️Disable</button>
-                    </form>
-                {% endif %}
-                <a class="btn btn-outline-danger ms-auto mt-1" href="{% url "indexer:site-delete" pk=site.id %}">🗑️Delete</a>
-            </td>
-            <td>
-                <!-- Bouton Google Search Console -->
-                <a href="{{ site.get_search_console_url|default:'#' }}" target="_blank" class="btn btn-outline-info" title="Google Search Console">📊</a>
+        {% for apikey in object_list %}
+            <tr>
 
-                <!-- Bouton Accès Direct au Site -->
-                <a href="{{ site.get_domain_url }}" target="_blank" class="btn btn-outline-primary" title="Accéder au site">🌐</a>
+                <th>{{ apikey.name }}</th>
+                
+                <td>{{ apikey.last_usage }}</td>
+                <td>{{ apikey.get_status_display }}</td>
+                <td>{{ apikey.count_today }} / {{ apikey.max_per_day }}</td>
 
-                <!-- Troisième Bouton avec Lien '#' -->
-                <a href="#" class="btn btn-outline-secondary" title="Outil à venir">🔧</a>
-            </td>
-            {% endwith %}
-        </tr>
-    {% endfor %}
-</tbody>
+                <td>
+                    <a class="btn btn-outline-danger ms-auto" href="{% url "indexer:apikey-delete" pk=apikey.id %}">Delete</a>
+                </td>
+            </tr>
+        {% endfor %}
 
-
+        </tbody>
     </table>
-{% endwith %}
+<!-- Pagination -->
+<div class="pagination mt-4">
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1" aria-label="First">
+                        <span aria-hidden="true">&laquo;&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            {% endif %}
 
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
 
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+                        <span aria-hidden="true">&raquo;&raquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
 </div>
 {% endblock content %}
