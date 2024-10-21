@@ -42,10 +42,10 @@
     </div>
 
 
-    <a href="{{ object.sitemap_url }}">{{ object.sitemap_url }}</a>
+    <h4>🗺️ Sitemap <a href="{{ object.sitemap_url }}" target="_blank">{{ object.sitemap_url }}</a></h4>
     {% with object.get_pages_statistics as page_statistics %}
         {% with page_statistics.by_statuses_percent as percent %}
-            {{  percent }}
+            
             <div class="specific-h-25 progress-stacked my-2">
                 <div class="progress fs-6"
                      role="progressbar"
