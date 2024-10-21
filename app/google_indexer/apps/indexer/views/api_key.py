@@ -13,7 +13,7 @@ class ApiKeyListView(FormMixin, ListView, ProcessFormView):
     model = ApiKey
     form_class = ApikeyImportForm
     queryset = ApiKey.objects.all().order_by('name')
-    paginate_by = 50  #définir la pagination à 50 clés par page
+    paginate_by = 100  #définir la pagination à 50 clés par page
 
     def get_success_url(self):
         return reverse('indexer:apikey-list')
@@ -59,6 +59,9 @@ class ApiKeyListView(FormMixin, ListView, ProcessFormView):
         usage_counts = ApiKey.total_usage_counts()
         context['total_indexation_keys'] = usage_counts['total_indexation_keys']
         context['total_check_keys'] = usage_counts['total_check_keys']  
+        # Ajouter la liste complète des pages pour la pagination
+        paginator = context['paginator']
+        context['page_numbers'] = range(1, paginator.num_pages + 1)
         return context
 
 
