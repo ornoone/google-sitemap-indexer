@@ -40,9 +40,9 @@ def chunks(lst, n):
 
 
 @lock_task('index_pages')  # Goes *after* the task decorator.
-@db_periodic_task(crontab(minute="*/5"))
+@db_periodic_task(crontab(minute="*"))  # On execute toute les minutes au lieu de 5 */5.
 def index_pages():
-    max_pending = (60 / WAIT_BETWEEN_VALIDATION_SECONDS) * 5
+    max_pending = 60 # on essaye une valeur à la main (60 / WAIT_BETWEEN_VALIDATION_SECONDS) * 5.
     chunk_size = max(0, max_pending - TrackedPage.objects.filter(status=PAGE_STATUS_PENDING_INDEXATION_CALL).count())
     now = timezone.now()
     if not has_available_apikey(now):
