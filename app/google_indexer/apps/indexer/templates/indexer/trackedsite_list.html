@@ -99,7 +99,9 @@
                 <a href="{{ site.get_domain_url }}" target="_blank" class="btn btn-outline-primary" title="Accéder au site">🌐</a>
 
                 <!-- Troisième Bouton avec Lien '#' -->
-                <a href="#" class="btn btn-outline-secondary" title="Outil à venir">🔧</a>
+                 {% if site.admin_url %}
+                    <a href="{{site.admin_url}}" class="btn btn-outline-secondary" title="admin">🔧</a>
+                {% endif %}
             </td>
             {% endwith %}
         </tr>

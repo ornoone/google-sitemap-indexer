@@ -34,6 +34,7 @@ class TrackedSite(models.Model):
     next_update = models.DateTimeField(null=True, blank=True)
     last_update = models.DateTimeField(null=True, blank=True)
     next_verification = models.DateTimeField(null=True, blank=True)
+    admin_url = models.URLField(null=True, blank=True)
 
     def get_pages_statistics(self):
         """Renvoie les statistiques des pages associées au site."""

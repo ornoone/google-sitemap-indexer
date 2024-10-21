@@ -20,7 +20,7 @@ will start 4 worker docker
 ## dev it 
 
 1. start the databsase
-   `docker compose up redis database`
+   `docker compose up redis database -d`
 2. start the django dev server (autoreload enabled)
    `docker compose -f docker-compose.yaml -f docker-compose.dev.yaml up backend`
 3. edit the code
@@ -40,6 +40,11 @@ docker compose -f docker-compose.yaml -f docker-compose.dev.yaml run backend ./m
 ```
 
 C. to open a shell
+```
+docker compose -f docker-compose.yaml -f docker-compose.dev.yaml run backend ./manage.py shell_plus   
+```
+
+D. to add an user
 ```
 docker compose -f docker-compose.yaml -f docker-compose.dev.yaml run backend ./manage.py shell_plus   
 ```

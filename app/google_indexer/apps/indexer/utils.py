@@ -88,7 +88,7 @@ def get_available_apikey(now, usage) -> ApiKey | None:
                     Q(last_usage__date=today) &
                     Q(count_of_the_day__lt=F('max_per_day'))
             )
-        ).select_for_update().first()
+        ).select_for_update().order_by("count_of_the_day").first()
         if available_key:
             if available_key.last_usage is not None and available_key.last_usage.date() == today:
                 available_key.last_usage = now
