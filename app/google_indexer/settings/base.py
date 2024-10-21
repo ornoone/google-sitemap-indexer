@@ -159,7 +159,7 @@ HUEY = {
         "url": None,  # Allow Redis config via a DSN.
     },
     "consumer": {
-        "workers": 4,  # 1 à lorigine, je passe à 4 pour tester.
+        "workers": 1,  
         "worker_type": "thread",
         "initial_delay": 0.1,  # Smallest polling interval, same as -d.
         "backoff": 1.15,  # Exponential backoff using this rate, -b.
@@ -240,4 +240,4 @@ LOGGING = {
 
 WAIT_REINDEX_SITEMAP_DAYS = env.int('WAIT_REINDEX_SITEMAP_DAYS', 3)
 WAIT_REINDEX_PAGES_DAYS = env.int('WAIT_REINDEX_PAGES_DAYS', 15)
-WAIT_BETWEEN_VALIDATION_SECONDS = env.int('WAIT_BETWEEN_VALIDATION_SECONDS', 0.1)
+WAIT_BETWEEN_VALIDATION_SECONDS = env.int('WAIT_BETWEEN_VALIDATION_SECONDS', 1)
