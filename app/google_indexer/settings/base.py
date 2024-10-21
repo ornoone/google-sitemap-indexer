@@ -159,7 +159,7 @@ HUEY = {
         "url": None,  # Allow Redis config via a DSN.
     },
     "consumer": {
-        "workers": 1,
+        "workers": 4,  # 1 à lorigine, je passe à 4 pour tester.
         "worker_type": "thread",
         "initial_delay": 0.1,  # Smallest polling interval, same as -d.
         "backoff": 1.15,  # Exponential backoff using this rate, -b.
