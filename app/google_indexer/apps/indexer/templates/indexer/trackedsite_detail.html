@@ -42,7 +42,7 @@
     </div>
 
 
-    <h4>🗺️ Sitemap <a href="{{ object.sitemap_url }}" target="_blank">{{ object.sitemap_url }}</a></h4>
+    <h5 class="my-4">🗺️ Sitemap <a href="{{ object.sitemap_url }}" target="_blank">{{ object.sitemap_url }}</a></h5>
     {% with object.get_pages_statistics as page_statistics %}
         {% with page_statistics.by_statuses_percent as percent %}
             
