@@ -81,6 +81,8 @@ class TrackedSiteActionView(SingleObjectMixin, View):
 
             object.pages.update(status=PAGE_STATUS_NEED_INDEXATION)
             messages.success(self.request, "all %d pages reseted" % object.pages.count())
+        elif action == 'reset_pending':
+            object.pages.filter(status=PAGE_STATUS_PENDING_INDEXATION_CALL).update(status=PAGE_STATUS_NEED_INDEXATION)
         elif action == 'hold':
             object.status = SITE_STATUS_HOLD
             object.save()

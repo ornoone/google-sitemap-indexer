@@ -39,7 +39,6 @@ def chunks(lst, n):
 # periodic_task take parameters as described in https://huey.readthedocs.io/en/latest/guide.html#periodic-tasks
 
 
-@lock_task('index_pages')  # Goes *after* the task decorator.
 @db_periodic_task(crontab(minute="*"))  # On execute toute les minutes au lieu de 5 */5.
 def index_pages():
     max_pending = 600 # on essaye une valeur à la main (60 / WAIT_BETWEEN_VALIDATION_SECONDS) * 5.
