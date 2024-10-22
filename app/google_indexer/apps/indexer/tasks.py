@@ -159,29 +159,36 @@ def index_page(page_id):
             # page will be checked later
             page.status = PAGE_STATUS_NEED_INDEXATION
             page.save()
-            raise Exception("no more api key available")
 
+            print("no more api key available. no indexation until next availability occurs")
+        error = None
         try:
             call_indexation(page.url, apikey)
             print("indexation call done")
         except ApiKeyExpired:
             print("api key expired")
+            error = "Api Key Expired"
             apikey.count_of_the_day = apikey.max_per_day + 1
             apikey.save()
+            
             retry = True
         except ApiKeyInvalid:
+            error = "Api key Invalid"
             print("api key invalid")
             apikey.status = APIKEY_INVALID
             apikey.save()
             retry = True
         except Exception as e:
             print("got exception")
+            error = "exception : %s" % traceback.format_exc()
             print_exc()
         else:
             page.status = PAGE_STATUS_INDEXED
             page.last_indexation = timezone.now()
             page.save()
             print("page saved.")
+        if error:
+            CallError.objects.create(api_key=apikey, page=page, site=page.site, error=error)
     remaining = end_throttle - time.time()
     if remaining > 0:
         time.sleep(remaining)

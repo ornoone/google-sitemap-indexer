@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from google_indexer.apps.indexer.models import TrackedSite, ApiKey, TrackedPage
+from google_indexer.apps.indexer.models import TrackedSite, ApiKey, TrackedPage, CallError
 
 
 # Register your models here.
@@ -49,3 +49,7 @@ class ApiKeyAdmin(admin.ModelAdmin):
         "status",
         "last_usage"
     )
+
+@admin.register(CallError)
+class CallErrorAdmin(admin.ModelAdmin):
+    list_display = ("date", "api_key", "page", "site")

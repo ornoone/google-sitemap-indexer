@@ -136,3 +136,12 @@ class ApiKey(models.Model):
             'total_indexation_keys': total_indexation,
             'total_check_keys': total_check,
         }
+
+
+class CallError(models.Model):
+    error = models.TextField(blank=True, null=True, default='')
+    api_key = models.ForeignKey(ApiKey, on_delete=models.CASCADE, related_name='call_errors')
+    site = models.ForeignKey(TrackedSite, on_delete=models.CASCADE, related_name='call_errors')
+    page = models.ForeignKey(TrackedPage, on_delete=models.CASCADE, related_name='call_errors', null=True)
+    date = models.DateTimeField(auto_now=True)
+
