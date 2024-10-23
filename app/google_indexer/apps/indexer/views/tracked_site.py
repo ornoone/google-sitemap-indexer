@@ -51,11 +51,7 @@ class TrackedSiteDetailView(DetailView):
             if status_filter is None or status_filter == status:
                 top10.extend(self.object.pages.filter(status=status).order_by('id')[:10])
         return super().get_context_data(top10=top10, **kwargs)
-            # Ajouter le nombre de liens dans la file d'attente
-       queue_count = TrackedPage.objects.filter(status=PAGE_STATUS_PENDING_INDEXATION_CALL).count()
-       context['queue_count'] = queue_count
 
-        return context
 
 
 
