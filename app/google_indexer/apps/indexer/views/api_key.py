@@ -62,6 +62,10 @@ class ApiKeyListView(FormMixin, ListView, ProcessFormView):
         # Ajouter la liste complète des pages pour la pagination
         paginator = context['paginator']
         context['page_numbers'] = range(1, paginator.num_pages + 1)
+        # Ajouter le nombre de clés disponibles
+        available_keys_count = ApiKey.objects.filter(status='valid', count_of_the_day__lt=F('max_per_day')).count()  # Assurez-vous que 'valid' est la valeur correcte du statut
+        context['available_keys_count'] = available_keys_count
+        
         return context
 
 
