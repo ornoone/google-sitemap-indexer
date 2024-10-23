@@ -60,6 +60,7 @@ def index_pages():
         if not filtered_page_queryset.exists():
             # if there is no new pages, we reindex the already indexed ones that is older than WAIT_REINDEX_PAGES_DAYS
             last_validation_reindex = timezone.now() - datetime.timedelta(days=WAIT_REINDEX_PAGES_DAYS)
+            print("no new page, trying to find old indexed pages indexed before %s" % last_validation_reindex)
             filtered_page_queryset = TrackedPage.objects.filter(
                 status=PAGE_STATUS_INDEXED,
                 last_indexation__lte=last_validation_reindex
@@ -75,6 +76,7 @@ def index_pages():
             status=PAGE_STATUS_PENDING_INDEXATION_CALL,
             last_indexation=now
         )
+        print("found %d pages to reindex" % (len(id_page_to_update), ))
 
     for page_id in id_page_to_update:
         index_page(page_id)
