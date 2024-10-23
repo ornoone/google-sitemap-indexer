@@ -8,7 +8,7 @@ from django.db import transaction
 from django.db.models import Q, F
 from django.utils import timezone
 from huey import crontab, CancelExecution
-from huey.contrib.djhuey import db_periodic_task, db_task, lock_task
+from huey.contrib.djhuey import db_periodic_task, db_task, lock_task, HUEY
 
 from google_indexer.apps.indexer.exceptions import ApiKeyExpired, ApiKeyInvalid
 from google_indexer.apps.indexer.models import SITE_STATUS_CREATED, SITE_STATUS_OK, TrackedSite, TrackedPage, \
@@ -194,7 +194,9 @@ def index_page(page_id):
     remaining = end_throttle - time.time()
     if remaining > 0:
         time.sleep(remaining)
-
+  # Log the number of remaining tasks in the queue
+    remaining_tasks = len(HUEY.pending())
+    logger.info(f"Nombre de tâches restantes dans la file d'attente : {remaining_tasks}")
     if retry:
         raise CancelExecution()
 
