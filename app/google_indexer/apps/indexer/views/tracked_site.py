@@ -8,26 +8,26 @@ from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.edit import FormMixin, ProcessFormView
 
 from google_indexer.apps.indexer.form import TrackedSiteForm
-from google_indexer.apps.indexer.models import TrackedSite, TrackedPage, PAGE_STATUS_NEED_INDEXATION, \
-    SITE_STATUS_PENDING, PAGE_STATUS_PENDING_INDEXATION_CALL, \
-    SITE_STATUS_HOLD, SITE_STATUS_OK
+from google_indexer.apps.indexer.models import (
+    TrackedSite, TrackedPage, PAGE_STATUS_NEED_INDEXATION, SITE_STATUS_PENDING,
+    PAGE_STATUS_PENDING_INDEXATION_CALL, SITE_STATUS_HOLD, SITE_STATUS_OK
+)
 from google_indexer.apps.indexer.tasks import update_sitemap, index_page
 
 
 class TrackedSiteListView(FormMixin, ListView, ProcessFormView):
     model = TrackedSite
     form_class = TrackedSiteForm
-    
+
     def get_queryset(self):
         # Récupérer le paramètre de tri de la requête
         sort = self.request.GET.get('sort', 'name')  # 'name' est la valeur par défaut si aucun tri n'est défini
         queryset = TrackedSite.objects.all().order_by(sort)
-
         return queryset
-        
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+
         # Ajouter le nombre de liens dans la file d'attente
         queue_count = TrackedPage.objects.filter(status=PAGE_STATUS_PENDING_INDEXATION_CALL).count()
         context['queue_count'] = queue_count
@@ -35,24 +35,20 @@ class TrackedSiteListView(FormMixin, ListView, ProcessFormView):
         return context
 
     def post(self, request, *args, **kwargs):
-        """
-        Handle POST requests: instantiate a form instance with the passed
-        POST variables and then check if it's valid.
-        """
+        """Handle POST requests: instantiate a form instance with the passed POST variables and then check if it's valid."""
         self.object_list = self.get_queryset()
-
         form = self.get_form()
         if form.is_valid():
             self.object = form.save()
             update_sitemap(self.object.id)
-            return HttpResponseRedirect( reverse('indexer:site-detail', kwargs={'pk': self.object.pk}))
+            return HttpResponseRedirect(reverse('indexer:site-detail', kwargs={'pk': self.object.pk}))
         else:
             return self.form_invalid(form)
 
 
-
 class TrackedSiteDetailView(DetailView):
     model = TrackedSite
+
     def get_context_data(self, **kwargs):
         top10 = []
         status_filter = self.request.GET.get('status')
@@ -60,8 +56,6 @@ class TrackedSiteDetailView(DetailView):
             if status_filter is None or status_filter == status:
                 top10.extend(self.object.pages.filter(status=status).order_by('id')[:10])
         return super().get_context_data(top10=top10, **kwargs)
-
-
 
 
 class TrackedSiteDeleteView(DeleteView):
@@ -72,7 +66,6 @@ class TrackedSiteDeleteView(DeleteView):
 
 
 class TrackedSiteActionView(SingleObjectMixin, View):
-
     model = TrackedSite
 
     def get(self, request, pk):
@@ -82,8 +75,9 @@ class TrackedSiteActionView(SingleObjectMixin, View):
     def post(self, request, pk):
         object = self.get_object()
         action = self.request.POST.get('action')
+
         if action == 'update':
-            messages.success(self.request, "update fo sitemap enqueued successfully")
+            messages.success(self.request, "update for sitemap enqueued successfully")
             TrackedSite.objects.filter(pk=object.id).update(status=SITE_STATUS_PENDING)
             update_sitemap(object.id)
         elif action == 'reset_pages':
@@ -104,11 +98,11 @@ class TrackedSiteActionView(SingleObjectMixin, View):
                 object.save()
         else:
             messages.error(self.request, "unknown action %s" % action)
+
         return HttpResponseRedirect(reverse('indexer:site-detail', kwargs={'pk': object.id}))
 
 
 class TrackedPageActionView(SingleObjectMixin, View):
-
     model = TrackedPage
 
     def get(self, request, pk):
@@ -124,4 +118,5 @@ class TrackedPageActionView(SingleObjectMixin, View):
             index_page(object.id)
         else:
             messages.error(self.request, "unknown action %s" % action)
+
         return HttpResponseRedirect(reverse('indexer:site-detail', kwargs={'pk': object.site_id}))
