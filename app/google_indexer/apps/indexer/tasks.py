@@ -196,7 +196,7 @@ def index_page(page_id):
         time.sleep(remaining)
   # Log the number of remaining tasks in the queue
     remaining_tasks = len(HUEY.pending())
-    logger.info(f"Nombre de tâches restantes dans la file d'attente : {remaining_tasks}")
+    print(f"Nombre de tâches restantes dans la file d'attente : {remaining_tasks}")
     if retry:
         raise CancelExecution()
 
