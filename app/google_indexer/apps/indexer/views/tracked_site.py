@@ -87,11 +87,14 @@ class TrackedSiteActionView(SingleObjectMixin, View):
             TrackedSite.objects.filter(pk=object.id).update(status=SITE_STATUS_PENDING)
             update_sitemap(object.id)
         elif action == 'reset_pages':
-
             object.pages.update(status=PAGE_STATUS_NEED_INDEXATION)
             messages.success(self.request, "all %d pages reseted" % object.pages.count())
         elif action == 'reset_pending':
             object.pages.filter(status=PAGE_STATUS_PENDING_INDEXATION_CALL).update(status=PAGE_STATUS_NEED_INDEXATION)
+        elif action == 'reset_queue':
+            # Réinitialiser la file d'attente des pages avec le statut "PENDING_INDEXATION_CALL"
+            TrackedPage.objects.filter(status=PAGE_STATUS_PENDING_INDEXATION_CALL).update(status=PAGE_STATUS_NEED_INDEXATION)
+            messages.success(self.request, "La file d'attente a été réinitialisée. Toutes les pages ont été remises en statut 'NEED_INDEXATION'.")
         elif action == 'hold':
             object.status = SITE_STATUS_HOLD
             object.save()
