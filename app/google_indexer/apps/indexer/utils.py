@@ -89,7 +89,9 @@ def get_available_apikey(now, usage) -> ApiKey | None:
                     Q(count_of_the_day__lt=F('max_per_day'))
             )
         ).select_for_update().order_by("count_of_the_day", "last_usage").first()
+        prev_usage = None
         if available_key:
+            prev_usage = available_key.last_usage
             if available_key.last_usage is not None and available_key.last_usage.date() == today:
                 available_key.last_usage = now
                 available_key.count_of_the_day += 1
@@ -97,7 +99,7 @@ def get_available_apikey(now, usage) -> ApiKey | None:
                 available_key.last_usage = now
                 available_key.count_of_the_day = 1
             available_key.save()
-        return available_key
+        return prev_usage, available_key
 
 
 def has_available_apikey(now):

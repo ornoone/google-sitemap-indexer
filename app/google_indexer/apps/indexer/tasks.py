@@ -1,6 +1,6 @@
 import logging
 import datetime
-from traceback import print_exc
+from traceback import print_exc, format_exc
 
 from django.core.cache import cache
 from django.conf import settings
@@ -153,7 +153,7 @@ def index_page(page_id):
             print("page is not marked for indexation. skipping")
             raise CancelExecution(retry=False)
         # this call may take some time, and will call heavy stuff
-        apikey = get_available_apikey(timezone.now(), APIKEY_USAGE_INDEXATION)
+        prev_usage, apikey = get_available_apikey(timezone.now(), APIKEY_USAGE_INDEXATION)
         print("got key", apikey)
         if apikey is None:
             # page will be checked later
@@ -163,6 +163,12 @@ def index_page(page_id):
             print("no more api key available. no indexation until next availability occurs")
         error = None
         try:
+            next_usage = prev_usage + datetime.timedelta(seconds=1)
+            now = timezone.now()
+            if now < next_usage:
+                # wait one second to ensure we don't trigger google trottle
+                print("usage of the key %s too fast, waiting 1 second to be sure" % apikey)
+                time.sleep(1)
             call_indexation(page.url, apikey)
             print("indexation call done")
         except ApiKeyExpired:
@@ -180,7 +186,7 @@ def index_page(page_id):
             retry = True
         except Exception as e:
             print("got exception")
-            error = "exception : %s" % traceback.format_exc()
+            error = "exception : %s" % format_exc()
             print_exc()
         else:
             page.status = PAGE_STATUS_INDEXED
