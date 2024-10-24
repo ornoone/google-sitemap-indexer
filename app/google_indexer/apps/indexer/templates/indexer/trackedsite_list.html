@@ -45,6 +45,10 @@
 
         </div>
     </form>
+
+<div class="h5 my-3">Actually in queue : {{ queue_count }}</div>
+
+
 {% with request.GET.sort as current_sort %}
     <table class="table" style="margin-top:25px;">
         <thead>

@@ -24,6 +24,15 @@ class TrackedSiteListView(FormMixin, ListView, ProcessFormView):
         queryset = TrackedSite.objects.all().order_by(sort)
 
         return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Ajouter le nombre de liens dans la file d'attente
+        queue_count = TrackedPage.objects.filter(status=PAGE_STATUS_PENDING_INDEXATION_CALL).count()
+        context['queue_count'] = queue_count
+
+        return context
 
     def post(self, request, *args, **kwargs):
         """

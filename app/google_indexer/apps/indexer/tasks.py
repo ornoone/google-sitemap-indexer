@@ -8,13 +8,13 @@ from django.db import transaction
 from django.db.models import Q, F
 from django.utils import timezone
 from huey import crontab, CancelExecution
-from huey.contrib.djhuey import db_periodic_task, db_task, lock_task
+from huey.contrib.djhuey import db_periodic_task, db_task, lock_task, HUEY
 
 from google_indexer.apps.indexer.exceptions import ApiKeyExpired, ApiKeyInvalid
 from google_indexer.apps.indexer.models import SITE_STATUS_CREATED, SITE_STATUS_OK, TrackedSite, TrackedPage, \
     PAGE_STATUS_INDEXED, PAGE_STATUS_NEED_INDEXATION, SITE_STATUS_PENDING, \
     PAGE_STATUS_PENDING_INDEXATION_CALL, \
-    APIKEY_INVALID, APIKEY_USAGE_INDEXATION, SITE_STATUS_HOLD
+    APIKEY_INVALID, APIKEY_USAGE_INDEXATION, SITE_STATUS_HOLD, CallError
 from google_indexer.apps.indexer.utils import fetch_sitemap_links, call_indexation, \
     get_available_apikey, has_available_apikey
 import time
@@ -41,7 +41,7 @@ def chunks(lst, n):
 
 @db_periodic_task(crontab(minute="*"))  # On execute toute les minutes au lieu de 5 */5.
 def index_pages():
-    max_pending = 600 # on essaye une valeur à la main (60 / WAIT_BETWEEN_VALIDATION_SECONDS) * 5.
+    max_pending = 60 # on essaye une valeur à la main (60 / WAIT_BETWEEN_VALIDATION_SECONDS) * 5.
     chunk_size = max(0, max_pending - TrackedPage.objects.filter(status=PAGE_STATUS_PENDING_INDEXATION_CALL).count())
     now = timezone.now()
     if not has_available_apikey(now):
@@ -60,6 +60,7 @@ def index_pages():
         if not filtered_page_queryset.exists():
             # if there is no new pages, we reindex the already indexed ones that is older than WAIT_REINDEX_PAGES_DAYS
             last_validation_reindex = timezone.now() - datetime.timedelta(days=WAIT_REINDEX_PAGES_DAYS)
+            print("no new page, trying to find old indexed pages indexed before %s" % last_validation_reindex)
             filtered_page_queryset = TrackedPage.objects.filter(
                 status=PAGE_STATUS_INDEXED,
                 last_indexation__lte=last_validation_reindex
@@ -75,6 +76,7 @@ def index_pages():
             status=PAGE_STATUS_PENDING_INDEXATION_CALL,
             last_indexation=now
         )
+        print("found %d pages to reindex" % (len(id_page_to_update), ))
 
     for page_id in id_page_to_update:
         index_page(page_id)
@@ -198,7 +200,9 @@ def index_page(page_id):
     remaining = end_throttle - time.time()
     if remaining > 0:
         time.sleep(remaining)
-
+  # Log the number of remaining tasks in the queue
+    remaining_tasks = len(HUEY.pending())
+    print(f"Nombre de tâches restantes dans la file d'attente : {remaining_tasks}")
     if retry:
         raise CancelExecution()
 

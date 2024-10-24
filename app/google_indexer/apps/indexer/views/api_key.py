@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.urls import reverse
 from django.views.generic import ListView, DeleteView
 from django.views.generic.edit import FormMixin, ProcessFormView
+from django.db.models import F
 
 from google_indexer.apps.indexer.form import ApikeyImportForm
 from google_indexer.apps.indexer.models import ApiKey, APIKEY_USAGE_INDEXATION
@@ -62,6 +63,10 @@ class ApiKeyListView(FormMixin, ListView, ProcessFormView):
         # Ajouter la liste complète des pages pour la pagination
         paginator = context['paginator']
         context['page_numbers'] = range(1, paginator.num_pages + 1)
+        # Ajouter le nombre de clés disponibles
+        available_keys_count = ApiKey.objects.filter(count_of_the_day__lt=F('max_per_day')).count()
+        context['available_keys_count'] = available_keys_count
+        
         return context
 
 
