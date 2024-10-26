@@ -40,7 +40,7 @@ services:
     <<: *backend
     restart: always
     deploy:
-      replicas: 5
+      replicas: 8
 
     environment:
       START: huey
