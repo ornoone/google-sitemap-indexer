@@ -41,7 +41,7 @@ def chunks(lst, n):
 
 @db_periodic_task(crontab(minute="*"))  # On execute toute les minutes au lieu de 5 */5.
 def index_pages():
-    max_pending = 60 # on essaye une valeur à la main (60 / WAIT_BETWEEN_VALIDATION_SECONDS) * 5.
+    max_pending = 150 # on essaye une valeur à la main (60 / WAIT_BETWEEN_VALIDATION_SECONDS) * 5.
     chunk_size = max(0, max_pending - TrackedPage.objects.filter(status=PAGE_STATUS_PENDING_INDEXATION_CALL).count())
     now = timezone.now()
     if not has_available_apikey(now):
@@ -176,7 +176,7 @@ def index_page(page_id):
             if now < next_usage:
                 # Attendre une seconde pour éviter le throttle de Google
                 print("usage de la clé %s trop rapide, attente de 1 seconde" % apikey)
-                time.sleep(1)
+               # time.sleep(1)
 
             call_indexation(page.url, apikey)
             print("appel d'indexation terminé")
