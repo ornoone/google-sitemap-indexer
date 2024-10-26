@@ -165,7 +165,7 @@ def index_page(page_id):
             print("no more api key available. no indexation until next availability occurs")
         error = None
         try:
-            next_usage = prev_usage + datetime.timedelta(seconds=1)
+            next_usage = prev_usage + datetime.timedelta(seconds=0)
             now = timezone.now()
             if now < next_usage:
                 # wait one second to ensure we don't trigger google trottle
