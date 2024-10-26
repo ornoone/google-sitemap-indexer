@@ -165,14 +165,22 @@ def index_page(page_id):
             print("no more api key available. no indexation until next availability occurs")
         error = None
         try:
-            next_usage = prev_usage + datetime.timedelta(seconds=1)
+            if prev_usage is not None:
+                next_usage = prev_usage + datetime.timedelta(seconds=1)
+            else:
+                # Initialise next_usage avec une valeur par défaut si prev_usage est None
+                next_usage = timezone.now() + datetime.timedelta(seconds=1)
+                print("prev_usage est None, initialisation de next_usage à la valeur actuelle.")
+
             now = timezone.now()
             if now < next_usage:
-                # wait one second to ensure we don't trigger google trottle
-                print("usage of the key %s too fast, waiting 1 second to be sure" % apikey)
+                # Attendre une seconde pour éviter le throttle de Google
+                print("usage de la clé %s trop rapide, attente de 1 seconde" % apikey)
                 time.sleep(1)
+
             call_indexation(page.url, apikey)
-            print("indexation call done")
+            print("appel d'indexation terminé")
+            
         except ApiKeyExpired:
             print("api key expired")
             error = "Api Key Expired"
