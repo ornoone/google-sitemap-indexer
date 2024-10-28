@@ -2,9 +2,11 @@ import urllib.parse
 from traceback import print_exc
 
 import requests
+import datetime
 import xml.etree.ElementTree as ET
 
 from django.db import transaction
+from django.utils import timezone
 from django.db.models import Q, F
 from google.oauth2 import service_account
 
@@ -76,23 +78,23 @@ def get_available_apikey(now, usage) -> ApiKey | None:
     update the availability of the returned key
     :return:
     """
-    today = now.date()
+    begin_of_today = timezone.make_aware(datetime.datetime.combine(now.date(), datetime.time(hour=9, minute=0, second=0)))
     with transaction.atomic():
         available_key = ApiKey.objects.filter(
             usage=usage,
             status=APIKEY_VALID
         ).filter(
-            Q(last_usage__date__lt=today) |
-            Q(last_usage__date__isnull=True) |
+            Q(last_usage__lt=begin_of_today) |
+            Q(last_usage__isnull=True) |
             (
-                    Q(last_usage__date=today) &
+                    Q(last_usage__gte=begin_of_today) &
                     Q(count_of_the_day__lt=F('max_per_day'))
             )
         ).select_for_update().order_by("count_of_the_day", "last_usage").first()
         prev_usage = None
         if available_key:
             prev_usage = available_key.last_usage
-            if available_key.last_usage is not None and available_key.last_usage.date() == today:
+            if available_key.last_usage is not None and available_key.last_usage >= begin_of_today:
                 available_key.last_usage = now
                 available_key.count_of_the_day += 1
             else:
@@ -103,7 +105,8 @@ def get_available_apikey(now, usage) -> ApiKey | None:
 
 
 def has_available_apikey(now):
-    today = now.date()
+    begin_of_today = timezone.make_aware(datetime.datetime.combine(now.date(), datetime.time(hour=9, minute=0, second=0)))
+
     return ApiKey.objects.filter(status=APIKEY_VALID).filter(
-        Q(last_usage__date__lt=today) | Q(last_usage__date__isnull=True) | (
-                    Q(last_usage__date=today) & Q(count_of_the_day__lt=F('max_per_day')))).exists()
+        Q(last_usage__lt=begin_of_today) | Q(last_usage__isnull=True) | (
+                    Q(last_usage__gte=begin_of_today) & Q(count_of_the_day__lt=F('max_per_day')))).exists()

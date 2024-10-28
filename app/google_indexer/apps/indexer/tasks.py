@@ -131,7 +131,7 @@ def update_sitemap(site_id):
     ])
     print("created %d pages" % len(total))
 
-    for chunk in chunks(to_delete, 50):
+    for chunk in chunks(list(to_delete), 50):
         deleted = site.pages.filter(url__in=chunk).delete()
         print("deleted", deleted)
 

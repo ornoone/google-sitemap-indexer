@@ -53,3 +53,4 @@ class ApiKeyAdmin(admin.ModelAdmin):
 @admin.register(CallError)
 class CallErrorAdmin(admin.ModelAdmin):
     list_display = ("date", "api_key", "page", "site")
+    readonly_fields = ("api_key", "date", "page", "site")
