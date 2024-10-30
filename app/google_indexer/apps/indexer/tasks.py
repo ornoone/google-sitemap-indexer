@@ -14,7 +14,7 @@ from google_indexer.apps.indexer.exceptions import ApiKeyExpired, ApiKeyInvalid
 from google_indexer.apps.indexer.models import SITE_STATUS_CREATED, SITE_STATUS_OK, TrackedSite, TrackedPage, \
     PAGE_STATUS_INDEXED, PAGE_STATUS_NEED_INDEXATION, SITE_STATUS_PENDING, \
     PAGE_STATUS_PENDING_INDEXATION_CALL, \
-    APIKEY_INVALID, APIKEY_USAGE_INDEXATION, SITE_STATUS_HOLD, CallError
+    APIKEY_INVALID, APIKEY_USAGE_INDEXATION, SITE_STATUS_HOLD, CallError, ApiKey
 from google_indexer.apps.indexer.utils import fetch_sitemap_links, call_indexation, \
     get_available_apikey, has_available_apikey
 import time
@@ -80,6 +80,14 @@ def index_pages():
 
     for page_id in id_page_to_update:
         index_page(page_id)
+
+@db_periodic_task(crontab(hour="9"))
+def reset_keys():
+    """
+    reset the key usages
+    """
+    ApiKey.objects.update(count_of_the_day=0)
+
 
 
 @lock_task('refresh_sitemap')  # Goes *after* the task decorator.
