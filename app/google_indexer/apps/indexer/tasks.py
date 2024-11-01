@@ -81,7 +81,7 @@ def index_pages():
     for page_id in id_page_to_update:
         index_page(page_id)
 
-@db_periodic_task(crontab(hour="9"))
+@db_periodic_task(crontab(hour="9", minute="0"))
 def reset_keys():
     """
     reset the key usages
