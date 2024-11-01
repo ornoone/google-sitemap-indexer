@@ -6,12 +6,16 @@ from django.views import View
 from django.views.generic import ListView, DetailView, DeleteView
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.edit import FormMixin, ProcessFormView
+import datetime
+from django.conf import settings
 
 from google_indexer.apps.indexer.form import TrackedSiteForm
 from google_indexer.apps.indexer.models import TrackedSite, TrackedPage, PAGE_STATUS_NEED_INDEXATION, \
     SITE_STATUS_PENDING, PAGE_STATUS_PENDING_INDEXATION_CALL, \
-    SITE_STATUS_HOLD, SITE_STATUS_OK
+    SITE_STATUS_HOLD, SITE_STATUS_OK, PAGE_STATUS_INDEXED
 from google_indexer.apps.indexer.tasks import update_sitemap, index_page
+
+WAIT_REINDEX_PAGES_DAYS = settings.WAIT_REINDEX_PAGES_DAYS
 
 
 class TrackedSiteListView(FormMixin, ListView, ProcessFormView):
@@ -34,6 +38,8 @@ class TrackedSiteListView(FormMixin, ListView, ProcessFormView):
         context['to_index_count'] = TrackedPage.objects.filter(
                 status=PAGE_STATUS_NEED_INDEXATION,
             ).exclude(site__status=SITE_STATUS_HOLD).count()
+        last_validation_reindex = timezone.now() - datetime.timedelta(days=WAIT_REINDEX_PAGES_DAYS)
+
         context['to_index_maintenance'] = TrackedPage.objects.filter(
                 status=PAGE_STATUS_INDEXED,
                 last_indexation__lte=last_validation_reindex
