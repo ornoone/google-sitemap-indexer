@@ -31,6 +31,13 @@ class TrackedSiteListView(FormMixin, ListView, ProcessFormView):
         # Ajouter le nombre de liens dans la file d'attente
         queue_count = TrackedPage.objects.filter(status=PAGE_STATUS_PENDING_INDEXATION_CALL).count()
         context['queue_count'] = queue_count
+        context['to_index_count'] = TrackedPage.objects.filter(
+                status=PAGE_STATUS_NEED_INDEXATION,
+            ).exclude(site__status=SITE_STATUS_HOLD).count()
+        context['to_index_maintenance'] = TrackedPage.objects.filter(
+                status=PAGE_STATUS_INDEXED,
+                last_indexation__lte=last_validation_reindex
+            ).exclude(site__status=SITE_STATUS_HOLD).count()
 
         return context
 
