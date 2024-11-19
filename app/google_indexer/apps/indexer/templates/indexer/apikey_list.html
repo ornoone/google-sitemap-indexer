@@ -8,21 +8,10 @@
         
         <h3 class="my-3">🔑API Keys Management</h3>
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th scope="col">⚡ Total API keys</th>
-            <th scope="col">🟢 Available API keys</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>{{ total_indexation_keys }}</td>
-            <td>{{ available_keys_count }}</td>
-        </tr>
-    </tbody>
-</table>
-
+        <div class="key-usage-summary">
+            <span class="h4 my-3">⚡ Total API keys : <strong>{{ total_indexation_keys }}</strong></span><br/>
+            <span class="h5 my-3">🟢 Available API keys : {{ available_keys_count }}</span>
+        </div>
         
         <div class="accordion accordion-flush my-2 py-1" id="accordionFlushExample">
             <div class="accordion-item">
@@ -60,10 +49,18 @@
     <table id="apikeyTable" class="table">
         <thead>
             <tr>
-                <th scope="col" class="h4" onclick="sortTable(0)">🏷️Name <span id="sortIcon0">🔽</span></th>
-                <th scope="col" class="h4" onclick="sortTable(1)">🕒Last Usage <span id="sortIcon1">🔽</span></th>
-                <th scope="col" class="h4" onclick="sortTable(2)">🔍Status <span id="sortIcon2">🔽</span></th>
-                <th scope="col" class="h4" onclick="sortTableNumeric(3)">📈Key Usage Rate <span id="sortIcon3">🔽</span></th>
+                <th scope="col" class="h4">
+                    <a href="{% url 'indexer:apikey-list' %}?sort=name" class="text-decoration-none">🏷️Name</a>
+                </th>
+                <th scope="col" class="h4">
+                    <a href="{% url 'indexer:apikey-list' %}?sort=last_usage" class="text-decoration-none">🕒Last Usage</a>
+                </th>
+                <th scope="col" class="h4">
+                    <a href="{% url 'indexer:apikey-list' %}?sort=status" class="text-decoration-none">🔍Status</a>
+                </th>
+                <th scope="col" class="h4">
+                    <a href="{% url 'indexer:apikey-list' %}?sort=usage_rate" class="text-decoration-none">📈Key Usage Rate</a>
+                </th>
                 <th scope="col" class="h4">🗑️Delete</th>
             </tr>
         </thead>
@@ -108,130 +105,4 @@
             </ul>
         </nav>
     </div>
-
-    <script>
-function sortTable(n) {
-    try {
-        var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-        table = document.getElementById("apikeyTable");
-        switching = true;
-        dir = "asc"; 
-        var sortIcon = document.getElementById("sortIcon" + n);
-
-        while (switching) {
-            switching = false;
-            rows = table.rows;
-            for (i = 1; i < (rows.length - 1); i++) {
-                shouldSwitch = false;
-                x = rows[i].getElementsByTagName("TD")[n];
-                y = rows[i + 1].getElementsByTagName("TD")[n];
-                
-                // Check if x and y are defined and not empty
-                if (x && y && x.innerHTML.trim() && y.innerHTML.trim()) {
-                    if (dir == "asc") {
-                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                            shouldSwitch = true;
-                            break;
-                        }
-                    } else if (dir == "desc") {
-                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-                            shouldSwitch = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            if (shouldSwitch) {
-                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                switching = true;
-                switchcount++;
-            } else {
-                if (switchcount == 0 && dir == "asc") {
-                    dir = "desc";
-                    switching = true;
-                }
-            }
-        }
-        
-        // Update sort icon dynamically
-        sortIcon.innerHTML = (dir == "asc") ? "🔼" : "🔽";
-        
-        // Reset other icons
-        for (var j = 0; j < 4; j++) {
-            if (j !== n) {
-                document.getElementById("sortIcon" + j).innerHTML = "🔽";
-            }
-        }
-    } catch (error) {
-        console.error("An error occurred while sorting the table:", error);
-    }
-}
-
-
-       function sortTableNumeric(n) {
-    try {
-        var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-        table = document.getElementById("apikeyTable");
-        switching = true;
-        dir = "asc";
-        var sortIcon = document.getElementById("sortIcon" + n);
-
-        while (switching) {
-            switching = false;
-            rows = table.rows;
-            for (i = 1; i < (rows.length - 1); i++) {
-                shouldSwitch = false;
-                x = rows[i].getElementsByTagName("TD")[n];
-                y = rows[i + 1].getElementsByTagName("TD")[n];
-
-                // Check if x and y are defined and not empty
-                if (x && y && x.innerText.trim() && y.innerText.trim()) {
-                    // Extract the numeric part before comparison
-                    var xValue = parseInt(x.innerText.split('/')[0].trim());
-                    var yValue = parseInt(y.innerText.split('/')[0].trim());
-
-                    // If the parsed value is NaN, assign a default value for comparison
-                    if (isNaN(xValue)) xValue = -Infinity;
-                    if (isNaN(yValue)) yValue = -Infinity;
-
-                    if (dir == "asc") {
-                        if (xValue > yValue) {
-                            shouldSwitch = true;
-                            break;
-                        }
-                    } else if (dir == "desc") {
-                        if (xValue < yValue) {
-                            shouldSwitch = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            if (shouldSwitch) {
-                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                switching = true;
-                switchcount++;
-            } else {
-                if (switchcount == 0 && dir == "asc") {
-                    dir = "desc";
-                    switching = true;
-                }
-            }
-        }
-
-        // Update sort icon dynamically
-        sortIcon.innerHTML = (dir == "asc") ? "🔼" : "🔽";
-
-        // Reset other icons
-        for (var j = 0; j < 4; j++) {
-            if (j !== n) {
-                document.getElementById("sortIcon" + j).innerHTML = "🔽";
-            }
-        }
-    } catch (error) {
-        console.error("An error occurred while sorting the table numerically:", error);
-    }
-}
-
-    </script>
 {% endblock content %}
