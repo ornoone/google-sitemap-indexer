@@ -4,9 +4,41 @@
 
 {% block content %}
 
-    <form action="" method="post">
+<div class="h3 my-3">🌐Website Management</div>
+    
+
+    <div class="h3 my-3">📑Summary</div>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th scope="col">⏳Actually in queue <form action="{% url 'indexer:site-action' %}" method="post" style="display: inline-block !important;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="reset-all-pending"/>
+                    <button class="btn btn-outline-danger ms-1" type="submit" title="reset">❗Reset</button>
+                </form></th>
+                <th scope="col">🔝Initial indexing</th>
+                <th scope="col">🔄Re-indexing
+                
+                </th>
+                <th scope="col">⚡Total API keys</th>
+                <th scope="col">🟢Available API keys</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ queue_count }}</td>
+                <td>{{ to_index_count }}</td>
+                <td>{{ queue_count }}</td>
+                <td>{{  total_keys }}</td>
+                <td>{{  available_keys }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+
+<form action="" method="post">
         {% csrf_token %}
-        <h3 class="my-3">🌐Website Management</h3>      
+            
         <div class="accordion accordion-flush my-3" id="accordionFlushExample" >
             <div class="accordion-item style="border-bottom-width: 0px;">
                 <h2 class="accordion-header">
@@ -38,34 +70,6 @@
             </div>
         </div>
     </form>
-
-    <div class="h3 my-3">📑Summary</div>
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th scope="col">⏳Actually in queue <form action="{% url 'indexer:site-action' %}" method="post" style="display: inline-block !important;">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="reset-all-pending"/>
-                    <button class="btn btn-outline-danger ms-1" type="submit" title="reset">❗Reset</button>
-                </form></th>
-                <th scope="col">🔝Initial indexing</th>
-                <th scope="col">🔄Re-indexing
-                
-                </th>
-                <th scope="col">⚡Total API keys</th>
-                <th scope="col">🟢Available API keys</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{ queue_count }}</td>
-                <td>{{ to_index_count }}</td>
-                <td>{{ queue_count }}</td>
-                <td>{{  total_keys }}</td>
-                <td>{{  available_keys }}</td>
-            </tr>
-        </tbody>
-    </table>
 
     {% with request.GET.sort as current_sort %}
     <table id="websiteTable" class="table" style="margin-top:25px;">
