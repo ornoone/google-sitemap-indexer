@@ -46,38 +46,39 @@
         </div>
     </form>
 
-    <table id="apikeyTable" class="table">
-        <thead>
+<table id="apikeyTable" class="table">
+    <thead>
+        <tr>
+            <th scope="col" class="h4">
+                <a href="?sort={% if request.GET.sort == 'name' %}-name{% else %}name{% endif %}" class="text-decoration-none">🏷️Name</a>
+            </th>
+            <th scope="col" class="h4">
+                <a href="?sort={% if request.GET.sort == 'last_usage' %}-last_usage{% else %}last_usage{% endif %}" class="text-decoration-none">🕒Last Usage</a>
+            </th>
+            <th scope="col" class="h4">
+                <a href="?sort={% if request.GET.sort == 'status' %}-status{% else %}status{% endif %}" class="text-decoration-none">🔍Status</a>
+            </th>
+            <th scope="col" class="h4">
+                <a href="?sort={% if request.GET.sort == 'usage_rate' %}-usage_rate{% else %}usage_rate{% endif %}" class="text-decoration-none">📈Key Usage Rate</a>
+            </th>
+            <th scope="col" class="h4">🗑️Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for apikey in object_list %}
             <tr>
-                <th scope="col" class="h4">
-                    <a href="{% url 'indexer:apikey-list' %}?sort=name" class="text-decoration-none">🏷️Name</a>
-                </th>
-                <th scope="col" class="h4">
-                    <a href="{% url 'indexer:apikey-list' %}?sort=last_usage" class="text-decoration-none">🕒Last Usage</a>
-                </th>
-                <th scope="col" class="h4">
-                    <a href="{% url 'indexer:apikey-list' %}?sort=status" class="text-decoration-none">🔍Status</a>
-                </th>
-                <th scope="col" class="h4">
-                    <a href="{% url 'indexer:apikey-list' %}?sort=usage_rate" class="text-decoration-none">📈Key Usage Rate</a>
-                </th>
-                <th scope="col" class="h4">🗑️Delete</th>
+                <td>{{ apikey.name }}</td>
+                <td>{{ apikey.last_usage }}</td>
+                <td>{{ apikey.get_status_display }}</td>
+                <td>{{ apikey.count_of_the_day }} / {{ apikey.max_per_day }}</td>
+                <td>
+                    <a class="btn btn-outline-danger ms-auto" href="{% url "indexer:apikey-delete" pk=apikey.id %}">Delete</a>
+                </td>
             </tr>
-        </thead>
-        <tbody>
-            {% for apikey in object_list %}
-                <tr>
-                    <td>{{ apikey.name }}</td>
-                    <td>{{ apikey.last_usage }}</td>
-                    <td>{{ apikey.get_status_display }}</td>
-                    <td>{{ apikey.count_of_the_day }} / {{ apikey.max_per_day }}</td>
-                    <td>
-                        <a class="btn btn-outline-danger ms-auto" href="{% url "indexer:apikey-delete" pk=apikey.id %}">Delete</a>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        {% endfor %}
+    </tbody>
+</table>
+
 
     <!-- Pagination -->
     <div class="pagination-container my-4 d-flex justify-content-center">
