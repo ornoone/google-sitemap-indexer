@@ -46,7 +46,7 @@
         </div>
     </form>
 
-    <table class="table">
+    <table id="apikeyTable" class="table">
         <thead>
             <tr>
                 <th scope="col" class="h4" onclick="sortTable(0)">🏷️Name 🔽</th>
@@ -59,7 +59,7 @@
         <tbody>
             {% for apikey in object_list %}
                 <tr>
-                    <th>{{ apikey.name }}</th>
+                    <td>{{ apikey.name }}</td>
                     <td>{{ apikey.last_usage }}</td>
                     <td>{{ apikey.get_status_display }}</td>
                     <td>{{ apikey.count_of_the_day }} / {{ apikey.max_per_day }}</td>
@@ -111,15 +111,17 @@
                     shouldSwitch = false;
                     x = rows[i].getElementsByTagName("TD")[n];
                     y = rows[i + 1].getElementsByTagName("TD")[n];
-                    if (dir == "asc") {
-                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                            shouldSwitch = true;
-                            break;
-                        }
-                    } else if (dir == "desc") {
-                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-                            shouldSwitch = true;
-                            break;
+                    if (x && y) {
+                        if (dir == "asc") {
+                            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                                shouldSwitch = true;
+                                break;
+                            }
+                        } else if (dir == "desc") {
+                            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                                shouldSwitch = true;
+                                break;
+                            }
                         }
                     }
                 }
