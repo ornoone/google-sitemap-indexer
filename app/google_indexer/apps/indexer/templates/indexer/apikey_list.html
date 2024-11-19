@@ -110,106 +110,128 @@
     </div>
 
     <script>
-        function sortTable(n) {
-            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-            table = document.getElementById("apikeyTable");
-            switching = true;
-            dir = "asc"; 
-            var sortIcon = document.getElementById("sortIcon" + n);
-            while (switching) {
-                switching = false;
-                rows = table.rows;
-                for (i = 1; i < (rows.length - 1); i++) {
-                    shouldSwitch = false;
-                    x = rows[i].getElementsByTagName("TD")[n];
-                    y = rows[i + 1].getElementsByTagName("TD")[n];
-                    if (x && y) {
-                        if (dir == "asc") {
-                            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                                shouldSwitch = true;
-                                break;
-                            }
-                        } else if (dir == "desc") {
-                            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-                                shouldSwitch = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-                if (shouldSwitch) {
-                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                    switching = true;
-                    switchcount ++; 
-                } else {
-                    if (switchcount == 0 && dir == "asc") {
-                        dir = "desc";
-                        switching = true;
-                    }
-                }
-            }
-            // Update sort icon dynamically
-            if (dir == "asc") {
-                sortIcon.innerHTML = "🔼";
-            } else {
-                sortIcon.innerHTML = "🔽";
-            }
-            // Reset other icons
-            for (var j = 0; j < 4; j++) {
-                if (j !== n) {
-                    document.getElementById("sortIcon" + j).innerHTML = "🔽";
-                }
-            }
-        }
+function sortTable(n) {
+    try {
+        var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+        table = document.getElementById("apikeyTable");
+        switching = true;
+        dir = "asc"; 
+        var sortIcon = document.getElementById("sortIcon" + n);
 
-        function sortTableNumeric(n) {
-            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-            table = document.getElementById("apikeyTable");
-            switching = true;
-            dir = "asc"; 
-            var sortIcon = document.getElementById("sortIcon" + n);
-            while (switching) {
-                switching = false;
-                rows = table.rows;
-                for (i = 1; i < (rows.length - 1); i++) {
-                    shouldSwitch = false;
-                    x = parseInt(rows[i].getElementsByTagName("TD")[n].innerText.split('/')[0].trim());
-                    y = parseInt(rows[i + 1].getElementsByTagName("TD")[n].innerText.split('/')[0].trim());
+        while (switching) {
+            switching = false;
+            rows = table.rows;
+            for (i = 1; i < (rows.length - 1); i++) {
+                shouldSwitch = false;
+                x = rows[i].getElementsByTagName("TD")[n];
+                y = rows[i + 1].getElementsByTagName("TD")[n];
+                
+                // Check if x and y are defined and not empty
+                if (x && y && x.innerHTML.trim() && y.innerHTML.trim()) {
                     if (dir == "asc") {
-                        if (x > y) {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
                             shouldSwitch = true;
                             break;
                         }
                     } else if (dir == "desc") {
-                        if (x < y) {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
                             shouldSwitch = true;
                             break;
                         }
                     }
                 }
-                if (shouldSwitch) {
-                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                    switching = true;
-                    switchcount ++; 
-                } else {
-                    if (switchcount == 0 && dir == "asc") {
-                        dir = "desc";
-                        switching = true;
-                    }
-                }
             }
-            // Update sort icon dynamically
-            if (dir == "asc") {
-                sortIcon.innerHTML = "🔼";
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                switchcount++;
             } else {
-                sortIcon.innerHTML = "🔽";
-            }
-            // Reset other icons
-            for (var j = 0; j < 4; j++) {
-                if (j !== n) {
-                    document.getElementById("sortIcon" + j).innerHTML = "🔽";
+                if (switchcount == 0 && dir == "asc") {
+                    dir = "desc";
+                    switching = true;
                 }
             }
         }
+        
+        // Update sort icon dynamically
+        sortIcon.innerHTML = (dir == "asc") ? "🔼" : "🔽";
+        
+        // Reset other icons
+        for (var j = 0; j < 4; j++) {
+            if (j !== n) {
+                document.getElementById("sortIcon" + j).innerHTML = "🔽";
+            }
+        }
+    } catch (error) {
+        console.error("An error occurred while sorting the table:", error);
+    }
+}
+
+
+       function sortTableNumeric(n) {
+    try {
+        var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+        table = document.getElementById("apikeyTable");
+        switching = true;
+        dir = "asc";
+        var sortIcon = document.getElementById("sortIcon" + n);
+
+        while (switching) {
+            switching = false;
+            rows = table.rows;
+            for (i = 1; i < (rows.length - 1); i++) {
+                shouldSwitch = false;
+                x = rows[i].getElementsByTagName("TD")[n];
+                y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                // Check if x and y are defined and not empty
+                if (x && y && x.innerText.trim() && y.innerText.trim()) {
+                    // Extract the numeric part before comparison
+                    var xValue = parseInt(x.innerText.split('/')[0].trim());
+                    var yValue = parseInt(y.innerText.split('/')[0].trim());
+
+                    // If the parsed value is NaN, assign a default value for comparison
+                    if (isNaN(xValue)) xValue = -Infinity;
+                    if (isNaN(yValue)) yValue = -Infinity;
+
+                    if (dir == "asc") {
+                        if (xValue > yValue) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (xValue < yValue) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                switchcount++;
+            } else {
+                if (switchcount == 0 && dir == "asc") {
+                    dir = "desc";
+                    switching = true;
+                }
+            }
+        }
+
+        // Update sort icon dynamically
+        sortIcon.innerHTML = (dir == "asc") ? "🔼" : "🔽";
+
+        // Reset other icons
+        for (var j = 0; j < 4; j++) {
+            if (j !== n) {
+                document.getElementById("sortIcon" + j).innerHTML = "🔽";
+            }
+        }
+    } catch (error) {
+        console.error("An error occurred while sorting the table numerically:", error);
+    }
+}
+
     </script>
 {% endblock content %}
