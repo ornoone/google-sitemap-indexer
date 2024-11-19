@@ -8,10 +8,20 @@
         
         <h3 class="my-3">🔑API Keys Management</h3>
 
-        <div class="key-usage-summary">
-            <span class="h4 my-3">⚡ Total API keys : <strong>{{ total_indexation_keys }}</strong></span><br/>
-            <span class="h5 my-3">🟢 Available API keys : {{ available_keys_count }}</span>
-        </div>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">⚡ Total API keys</th>
+            <th scope="col">🟢 Available API keys</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{ total_indexation_keys }}</td>
+            <td>{{ available_keys_count }}</td>
+        </tr>
+    </tbody>
+</table>
         
         <div class="accordion accordion-flush my-2 py-1" id="accordionFlushExample">
             <div class="accordion-item">
@@ -52,7 +62,7 @@
                 <th scope="col" class="h4" onclick="sortTable(0)">🏷️Name <span id="sortIcon0">🔽</span></th>
                 <th scope="col" class="h4" onclick="sortTable(1)">🕒Last Usage <span id="sortIcon1">🔽</span></th>
                 <th scope="col" class="h4" onclick="sortTable(2)">🔍Status <span id="sortIcon2">🔽</span></th>
-                <th scope="col" class="h4" onclick="sortTable(3)">📈Key Usage Rate <span id="sortIcon3">🔽</span></th>
+                <th scope="col" class="h4" onclick="sortTableNumeric(3)">📈Key Usage Rate <span id="sortIcon3">🔽</span></th>
                 <th scope="col" class="h4">🗑️Delete</th>
             </tr>
         </thead>
@@ -123,6 +133,56 @@
                                 shouldSwitch = true;
                                 break;
                             }
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount ++; 
+                } else {
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+            // Update sort icon dynamically
+            if (dir == "asc") {
+                sortIcon.innerHTML = "🔼";
+            } else {
+                sortIcon.innerHTML = "🔽";
+            }
+            // Reset other icons
+            for (var j = 0; j < 4; j++) {
+                if (j !== n) {
+                    document.getElementById("sortIcon" + j).innerHTML = "🔽";
+                }
+            }
+        }
+
+        function sortTableNumeric(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("apikeyTable");
+            switching = true;
+            dir = "asc"; 
+            var sortIcon = document.getElementById("sortIcon" + n);
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = parseInt(rows[i].getElementsByTagName("TD")[n].innerText.split('/')[0].trim());
+                    y = parseInt(rows[i + 1].getElementsByTagName("TD")[n].innerText.split('/')[0].trim());
+                    if (dir == "asc") {
+                        if (x > y) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x < y) {
+                            shouldSwitch = true;
+                            break;
                         }
                     }
                 }
