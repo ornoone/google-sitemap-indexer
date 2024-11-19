@@ -2,138 +2,176 @@
 
 {% block indexer_nav_active %}active{% endblock indexer_nav_active %}
 
-
 {% block content %}
 
     <form action="" method="post">
         {% csrf_token %}
-  <h3 class="my-3">🌐Website Management</h3>      
-<div class="accordion accordion-flush my-3" id="accordionFlushExample" >
-  <div class="accordion-item style="border-bottom-width: 0px;">
-    <h2 class="accordion-header">
-      <button class="btn btn-outline-light collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
-        <strong>✚ Add website</strong>
-      </button>
-    </h2>
-    <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
-     
-         <div class="accordion-body"><div class="container border border-light my-1 py-1">
-         <div class="row row align-items-center"><div class="mb-3 col">
-                {{ form.name.errors }}
-                <label class="form-label" for="{{ form.name.id_for_label }}">🏷️Website Friendly Name</label>
-                <input name="{{ form.name.html_name }}" type="text" class="form-control"
-                       id="{{ form.name.id_for_label }}" required placeholder="my website">
-
+        <h3 class="my-3">🌐Website Management</h3>      
+        <div class="accordion accordion-flush my-3" id="accordionFlushExample" >
+            <div class="accordion-item style="border-bottom-width: 0px;">
+                <h2 class="accordion-header">
+                    <button class="btn btn-outline-light collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                        <strong>✚ Add website</strong>
+                    </button>
+                </h2>
+                <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                    <div class="accordion-body">
+                        <div class="container border border-light my-1 py-1">
+                            <div class="row row align-items-center">
+                                <div class="mb-3 col">
+                                    {{ form.name.errors }}
+                                    <label class="form-label" for="{{ form.name.id_for_label }}">🏷️Website Friendly Name</label>
+                                    <input name="{{ form.name.html_name }}" type="text" class="form-control" id="{{ form.name.id_for_label }}" required placeholder="my website">
+                                </div>
+                                <div class="mb-3 col">
+                                    {{ form.sitemap_url.errors }}
+                                    <label class="form-label" for="{{ form.sitemap_url.id_for_label }}">🔗Sitemap URL</label>
+                                    <input name="{{ form.sitemap_url.html_name }}" type="url" class="form-control" id="{{ form.sitemap_url.id_for_label }}" required placeholder="https://mysite.com/sitemap.xml">
+                                </div>
+                                <div class="col">
+                                    <button type="submit" class="btn btn-outline-success ms-auto">✚ Add website</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            <div class="mb-3 col">
-                {{ form.sitemap_url.errors }}
-
-                <label class="form-label" for="{{ form.sitemap_url.id_for_label }}">🔗Sitemap URL</label>
-                <input name="{{ form.sitemap_url.html_name }}" type="url" class="form-control"
-                       id="{{ form.sitemap_url.id_for_label }}" required placeholder="https://mysite.com/sitemap.xml">
-
-            </div>
-            <div class="col">
-                <button type="submit" class="btn btn-outline-success ms-auto">✚ Add website</button>
-            </div></div>
-    </div>
-  </div>
-</div>
-
         </div>
     </form>
-<div class="h3 my-3">📑Summary</div>
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th scope="col">⏳Actually in queue</th>
-            <th scope="col">🔝Initial indexing</th>
-            <th scope="col">🔄Re-indexing</th>
-            <th scope="col">⚡Total API keys</th>
-            <th scope="col">🟢Available API keys</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>{{ queue_count }}</td>
-            <td>{{ to_index_count }}</td>
-            <td>{{ queue_count }}</td>
-            <td>soon</td>
-            <td>soon</td>
-        </tr>
-    </tbody>
-</table>
 
-
-
-{% with request.GET.sort as current_sort %}
-    <table class="table" style="margin-top:25px;">
+    <div class="h3 my-3">📑Summary</div>
+    <table class="table table-bordered">
         <thead>
-        <tr>
-            <!-- Lien pour trier par 'name' (croissant ou décroissant) -->
-            <th scope="col" class="h4">
-                <a href="?sort={% if current_sort == 'name' %}-name{% else %}name{% endif %}" class="text-decoration-none text-white">🌐Website</a>
-            </th>
-            
-            
-            <th scope="col" class="h4">⚙️Status</th>
-            <th scope="col" class="h4">🚀Sending</th>
-            <th scope="col" class="h4">📄Total pages</th>
-            <th scope="col" class="h4">🛠️Actions</th>
-            <th scope="col" class="h4">🔍Outils</th>
-        </tr>
+            <tr>
+                <th scope="col">⏳Actually in queue</th>
+                <th scope="col">🔝Initial indexing</th>
+                <th scope="col">🔄Re-indexing</th>
+                <th scope="col">⚡Total API keys</th>
+                <th scope="col">🟢Available API keys</th>
+            </tr>
         </thead>
         <tbody>
-    {% for site in object_list %}
-        <tr class="align-middle">
-            {% with site.get_pages_statistics as statistics %}
-            <th scope="row">
-                <a href="{% url "indexer:site-detail" site.id %}" class="h5 text-decoration-none text-white">
-                    <img src="{{ site.get_favicon_url }}" class="me-2" height="32" width="32">{{ site.name }}
-                </a>
-            </th>
-            
-            <td>{{ site.get_status_display }}</td>
-            <td>{{ statistics.by_statuses.5_INDEXED|default:0 }}</td>
-            <td>{{ statistics.total}}</td>                    
-            <td>
-                {% if site.status == 'HOLD' %}
-                    <form method="post" action="{% url 'indexer:site-action' pk=site.id %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="unhold"/>
-                        <button class="btn btn-outline-primary" type="submit">▶️Resume</button>
-                    </form>
-                {% else %}
-                    <form method="post" action="{% url 'indexer:site-action' pk=site.id %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="hold"/>
-                        <button class="btn btn-outline-warning" type="submit">⏸️Pause</button>
-                    </form>
-                {% endif %}
-                <a class="btn btn-outline-danger ms-auto mt-1" href="{% url "indexer:site-delete" pk=site.id %}">🗑️Delete</a>
-            </td>
-            <td>
-                <!-- Bouton Google Search Console -->
-                <a href="{{ site.get_search_console_url|default:'#' }}" target="_blank" class="btn btn-outline-info" title="Google Search Console">📊</a>
-
-                <!-- Bouton Accès Direct au Site -->
-                <a href="{{ site.get_domain_url }}" target="_blank" class="btn btn-outline-primary" title="Accéder au site">🌐</a>
-
-                <!-- Troisième Bouton avec Lien '#' -->
-                 {% if site.admin_url %}
-                    <a href="{{site.admin_url}}" class="btn btn-outline-secondary" title="admin" target="_blank">🔧</a>
-                {% endif %}
-            </td>
-            {% endwith %}
-        </tr>
-    {% endfor %}
-</tbody>
-
-
+            <tr>
+                <td>{{ queue_count }}</td>
+                <td>{{ to_index_count }}</td>
+                <td>{{ queue_count }}</td>
+                <td>soon</td>
+                <td>soon</td>
+            </tr>
+        </tbody>
     </table>
-{% endwith %}
 
+    {% with request.GET.sort as current_sort %}
+    <table id="websiteTable" class="table" style="margin-top:25px;">
+        <thead>
+            <tr>
+                <th scope="col" class="h4" onclick="sortTable(0)">🌐Website <span id="sortIcon0">🔽</span></th>
+                <th scope="col" class="h4" onclick="sortTable(1)">⚙️Status <span id="sortIcon1">🔽</span></th>
+                <th scope="col" class="h4" onclick="sortTable(2)">🚀Sending <span id="sortIcon2">🔽</span></th>
+                <th scope="col" class="h4" onclick="sortTable(3)">📄Total pages <span id="sortIcon3">🔽</span></th>
+                <th scope="col" class="h4">🛠️Actions</th>
+                <th scope="col" class="h4">🔍Outils</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for site in object_list %}
+                <tr class="align-middle">
+                    {% with site.get_pages_statistics as statistics %}
+                    <th scope="row">
+                        <a href="{% url "indexer:site-detail" site.id %}" class="h5 text-decoration-none text-white">
+                            <img src="{{ site.get_favicon_url }}" class="me-2" height="32" width="32">{{ site.name }}
+                        </a>
+                    </th>
+                    <td>{{ site.get_status_display }}</td>
+                    <td>{% if statistics.by_statuses.5_INDEXED|default:0 != statistics.total %}<strong class="text-danger">{{ statistics.by_statuses.5_INDEXED|default:0 }}</strong>{% else %}{{ statistics.by_statuses.5_INDEXED|default:0 }}{% endif %}</td>
+                    <td>{{ statistics.total }}</td>                    
+                    <td>
+                        {% if site.status == 'HOLD' %}
+                            <form method="post" action="{% url 'indexer:site-action' pk=site.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="unhold"/>
+                                <button class="btn btn-outline-primary" type="submit">▶️Resume</button>
+                            </form>
+                        {% else %}
+                            <form method="post" action="{% url 'indexer:site-action' pk=site.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="hold"/>
+                                <button class="btn btn-outline-warning" type="submit">⏸️Pause</button>
+                            </form>
+                        {% endif %}
+                        <a class="btn btn-outline-danger ms-auto mt-1" href="{% url "indexer:site-delete" pk=site.id %}">🗑️Delete</a>
+                    </td>
+                    <td>
+                        <!-- Bouton Google Search Console -->
+                        <a href="{{ site.get_search_console_url|default:'#' }}" target="_blank" class="btn btn-outline-info" title="Google Search Console">📊</a>
 
-</div>
+                        <!-- Bouton Accès Direct au Site -->
+                        <a href="{{ site.get_domain_url }}" target="_blank" class="btn btn-outline-primary" title="Accéder au site">🌐</a>
+
+                        <!-- Troisième Bouton avec Lien '#' -->
+                         {% if site.admin_url %}
+                            <a href="{{site.admin_url}}" class="btn btn-outline-secondary" title="admin" target="_blank">🔧</a>
+                        {% endif %}
+                    </td>
+                    {% endwith %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endwith %}
+
+    <script>
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("websiteTable");
+            switching = true;
+            dir = "asc"; 
+            var sortIcon = document.getElementById("sortIcon" + n);
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+                    if (x && y) {
+                        if (dir == "asc") {
+                            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                                shouldSwitch = true;
+                                break;
+                            }
+                        } else if (dir == "desc") {
+                            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                                shouldSwitch = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount ++; 
+                } else {
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+            // Update sort icon dynamically
+            if (dir == "asc") {
+                sortIcon.innerHTML = "🔼";
+            } else {
+                sortIcon.innerHTML = "🔽";
+            }
+            // Reset other icons
+            for (var j = 0; j < 4; j++) {
+                if (j !== n) {
+                    document.getElementById("sortIcon" + j).innerHTML = "🔽";
+                }
+            }
+        }
+    </script>
+
 {% endblock content %}
