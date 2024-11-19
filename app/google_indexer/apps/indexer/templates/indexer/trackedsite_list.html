@@ -7,14 +7,14 @@
 <div class="h3 my-3">🌐Website List</div>
     
 
-    <div class="h3 my-3">📑Summary</div>
+    <div class="h4 my-3">📑Summary</div>
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th scope="col">⏳Actually in queue <form action="{% url 'indexer:site-action' %}" method="post" style="display: inline-block !important;">
+                <th scope="col" class="position-relative">⏳Actually in queue <form action="{% url 'indexer:site-action' %}" method="post" style="display: inline-block !important;">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="reset-all-pending"/>
-                    <button class="btn btn-outline-danger ms-1" type="submit" title="reset">❗Reset</button>
+                    <button class="btn btn-outline-danger btn-sm me-1 position-absolute top-50 end-0 translate-middle-y" type="submit" title="reset">❗Reset</button>
                 </form></th>
                 <th scope="col">🔝Initial indexing</th>
                 <th scope="col">🔄Re-indexing
@@ -61,7 +61,7 @@
             <tr class="align-middle">
                 {% with site.get_pages_statistics as statistics %}
                 <th scope="row">
-                    <a href="{% url "indexer:site-detail" site.id %}" class="h5 text-decoration-none text-white">
+                    <a href="{% url "indexer:site-detail" site.id %}" class="h6 text-decoration-none text-white">
                         <img src="{{ site.get_favicon_url }}" class="me-2" height="32" width="32">{{ site.name }}
                     </a>
                 </th>
