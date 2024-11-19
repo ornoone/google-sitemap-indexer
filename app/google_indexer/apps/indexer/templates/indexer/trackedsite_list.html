@@ -95,30 +95,30 @@
                 <td>{{ statistics.total }}</td>                    
                 <td>
                     {% if site.status == 'HOLD' %}
-                        <form method="post" action="{% url 'indexer:site-action' pk=site.id %}">
+                        <form method="post" action="{% url 'indexer:site-action' pk=site.id %}" style="display: inline-block !important;">
                             {% csrf_token %}
                             <input type="hidden" name="action" value="unhold"/>
-                            <button class="btn btn-outline-primary" type="submit">▶️Resume</button>
+                            <button class="btn btn-outline-primary" type="submit" title="Resume Indexation">▶️</button>
                         </form>
                     {% else %}
-                        <form method="post" action="{% url 'indexer:site-action' pk=site.id %}">
+                        <form method="post" action="{% url 'indexer:site-action' pk=site.id %}" style="display: inline-block !important;">
                             {% csrf_token %}
                             <input type="hidden" name="action" value="hold"/>
-                            <button class="btn btn-outline-warning" type="submit">⏸️Pause</button>
+                            <button class="btn btn-outline-warning" type="submit" title="Pause Indexation">⏸️</button>
                         </form>
                     {% endif %}
-                    <a class="btn btn-outline-danger ms-auto mt-1" href="{% url "indexer:site-delete" pk=site.id %}">🗑️Delete</a>
+                    <a class="btn btn-outline-danger ms-1" href="{% url "indexer:site-delete" pk=site.id %}" title="Delete Websire">🗑️</a>
                 </td>
                 <td>
                     <!-- Bouton Google Search Console -->
                     <a href="{{ site.get_search_console_url|default:'#' }}" target="_blank" class="btn btn-outline-info" title="Google Search Console">📊</a>
 
                     <!-- Bouton Accès Direct au Site -->
-                    <a href="{{ site.get_domain_url }}" target="_blank" class="btn btn-outline-primary" title="Accéder au site">🌐</a>
+                    <a href="{{ site.get_domain_url }}" target="_blank" class="btn btn-outline-primary ms-1" title="Go to Website">🌐</a>
 
                     <!-- Troisième Bouton avec Lien '#' -->
                      {% if site.admin_url %}
-                        <a href="{{site.admin_url}}" class="btn btn-outline-secondary" title="admin" target="_blank">🔧</a>
+                        <a href="{{site.admin_url}}" class="btn btn-outline-secondary ms-1" title="BackOffice Website" target="_blank">🔧</a>
                     {% endif %}
                 </td>
                 {% endwith %}
