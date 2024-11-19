@@ -8,6 +8,7 @@ from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.edit import FormMixin, ProcessFormView
 import datetime
 from django.conf import settings
+from django.db.models import Count, F, Q
 
 from google_indexer.apps.indexer.form import TrackedSiteForm
 from google_indexer.apps.indexer.models import TrackedSite, TrackedPage, PAGE_STATUS_NEED_INDEXATION, \
@@ -25,11 +26,14 @@ class TrackedSiteListView(FormMixin, ListView, ProcessFormView):
     def get_queryset(self):
         # Récupérer le paramètre de tri de la requête
         sort = self.request.GET.get('sort', 'name')  # 'name' est la valeur par défaut si aucun tri n'est défini
-        # Traiter le cas où l'utilisateur demande un tri descendant
-        if sort.startswith('-'):
-            return TrackedSite.objects.all().order_by(sort)
-        else:
-            return TrackedSite.objects.all().order_by(sort)
+
+        # Annoter le queryset avec les statistiques des pages
+        queryset = TrackedSite.objects.annotate(
+            total_pages=Count('pages'),
+            sending=Count('pages', filter=Q(pages__status=PAGE_STATUS_INDEXED))
+        ).order_by(sort)
+
+        return queryset
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -62,6 +66,7 @@ class TrackedSiteListView(FormMixin, ListView, ProcessFormView):
         else:
             return self.form_invalid(form)
 
+
 class TrackedSiteDetailView(DetailView):
     model = TrackedSite
     def get_context_data(self, **kwargs):
@@ -71,7 +76,6 @@ class TrackedSiteDetailView(DetailView):
             if status_filter is None or status_filter == status:
                 top10.extend(self.object.pages.filter(status=status).order_by('id')[:10])
         return super().get_context_data(top10=top10, **kwargs)
-
 
 
 
