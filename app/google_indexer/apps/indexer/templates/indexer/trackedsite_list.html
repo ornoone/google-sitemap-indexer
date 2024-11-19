@@ -94,10 +94,10 @@
                 </a>
             </th>
             <td>
-                <button type="button" class="btn btn-outline-primary" data-toggle="collapse" data-target="#sitemap">Show URL</button>
-  <div id="sitemap" class="collapse">
-    {{ site.sitemap_url }}
-  </div> 
+                <button type="button" class="btn btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#sitemap{{ site.id }}">Show URL</button>
+                    <div id="sitemap{{ site.id }}" class="collapse">
+                            {{ site.sitemap_url }}
+                    </div>
             </td>
             <td>{{ site.get_status_display }}</td>
             <td>{{ statistics.by_statuses.5_INDEXED|default:0 }}</td>
