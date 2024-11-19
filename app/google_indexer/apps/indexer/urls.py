@@ -1,6 +1,6 @@
 from django.urls import path
 from google_indexer.apps.indexer.views.tracked_site import TrackedSiteListView, TrackedSiteDetailView, \
-    TrackedSiteDeleteView, TrackedPageActionView, TrackedSiteActionView
+    TrackedSiteDeleteView, TrackedPageActionView, TrackedSiteActionView, TrackedSiteBulkActionview
 from google_indexer.apps.indexer.views.api_key import ApiKeyListView, ApiKeyDeleteView
 
 app_name = "indexer"
@@ -9,6 +9,7 @@ urlpatterns = [
     path("site/<int:pk>/", TrackedSiteDetailView.as_view(), name="site-detail"),
     path("site/<int:pk>/delete", TrackedSiteDeleteView.as_view(), name="site-delete"),
 
+    path("site/action", TrackedSiteBulkActionview.as_view(), name="site-action"),
     path("site/<int:pk>/action", TrackedSiteActionView.as_view(), name="site-action"),
     path("page/<int:pk>/action", TrackedPageActionView.as_view(), name="page-action"),
     path("apikey/", ApiKeyListView.as_view(), name="apikey-list"),

@@ -89,6 +89,17 @@ def reset_keys():
     ApiKey.objects.update(count_of_the_day=0)
 
 
+@db_periodic_task(crontab(hour="9", minute="0"))
+def reset_pending():
+    """
+    reset the key usages
+    """
+
+    count = TrackedPage.objects.filter(status=PAGE_STATUS_PENDING_INDEXATION_CALL).update(status=PAGE_STATUS_NEED_INDEXATION)
+    print("reseted %d stale indexation in the queue" % count)
+
+
+
 
 @lock_task('refresh_sitemap')  # Goes *after* the task decorator.
 @db_periodic_task(crontab(minute="*/5"))

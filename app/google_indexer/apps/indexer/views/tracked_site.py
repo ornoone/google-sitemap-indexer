@@ -13,7 +13,7 @@ from django.db.models import Count, F, Q
 from google_indexer.apps.indexer.form import TrackedSiteForm
 from google_indexer.apps.indexer.models import TrackedSite, TrackedPage, PAGE_STATUS_NEED_INDEXATION, \
     SITE_STATUS_PENDING, PAGE_STATUS_PENDING_INDEXATION_CALL, \
-    SITE_STATUS_HOLD, SITE_STATUS_OK, PAGE_STATUS_INDEXED
+    SITE_STATUS_HOLD, SITE_STATUS_OK, PAGE_STATUS_INDEXED, ApiKey, APIKEY_VALID
 from google_indexer.apps.indexer.tasks import update_sitemap, index_page
 
 WAIT_REINDEX_PAGES_DAYS = settings.WAIT_REINDEX_PAGES_DAYS
@@ -41,6 +41,8 @@ class TrackedSiteListView(FormMixin, ListView, ProcessFormView):
         # Ajouter le nombre de liens dans la file d'attente
         queue_count = TrackedPage.objects.filter(status=PAGE_STATUS_PENDING_INDEXATION_CALL).count()
         context['queue_count'] = queue_count
+        context['total_keys'] = ApiKey.objects.count()
+        context['available_keys'] = ApiKey.objects.filter(status=APIKEY_VALID).filter(count_of_the_day__lt=F('max_per_day')).count()
         context['to_index_count'] = TrackedPage.objects.filter(
                 status=PAGE_STATUS_NEED_INDEXATION,
             ).exclude(site__status=SITE_STATUS_HOLD).count()
@@ -84,6 +86,17 @@ class TrackedSiteDeleteView(DeleteView):
 
     def get_success_url(self):
         return reverse('indexer:site-list')
+
+
+class TrackedSiteBulkActionview(View):
+    def post(self, request):
+        action = self.request.POST.get('action')
+
+        if action == 'reset-all-pending':
+            TrackedPage.objects.filter(status=PAGE_STATUS_PENDING_INDEXATION_CALL).update(status=PAGE_STATUS_NEED_INDEXATION)
+        else:
+            raise ValueError(f"unknown action {action}")
+        return HttpResponseRedirect(reverse('indexer:site-list'))
 
 
 class TrackedSiteActionView(SingleObjectMixin, View):

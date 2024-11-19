@@ -45,7 +45,13 @@
             <tr>
                 <th scope="col">⏳Actually in queue</th>
                 <th scope="col">🔝Initial indexing</th>
-                <th scope="col">🔄Re-indexing</th>
+                <th scope="col">🔄Re-indexing
+                <form action="{% url 'indexer:site-action' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="reset-all-pending"/>
+                    <button class="btn btn-outline-primary" type="submit" title="reset">reset</button>
+                </form>
+                </th>
                 <th scope="col">⚡Total API keys</th>
                 <th scope="col">🟢Available API keys</th>
             </tr>
@@ -55,8 +61,8 @@
                 <td>{{ queue_count }}</td>
                 <td>{{ to_index_count }}</td>
                 <td>{{ queue_count }}</td>
-                <td>soon</td>
-                <td>soon</td>
+                <td>{{  total_keys }}</td>
+                <td>{{  available_keys }}</td>
             </tr>
         </tbody>
     </table>
