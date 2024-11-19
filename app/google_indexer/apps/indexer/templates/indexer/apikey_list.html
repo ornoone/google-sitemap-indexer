@@ -49,10 +49,10 @@
     <table id="apikeyTable" class="table">
         <thead>
             <tr>
-                <th scope="col" class="h4" onclick="sortTable(0)">🏷️Name 🔽</th>
-                <th scope="col" class="h4" onclick="sortTable(1)">🕒Last Usage 🔽</th>
-                <th scope="col" class="h4" onclick="sortTable(2)">🔍Status 🔽</th>
-                <th scope="col" class="h4" onclick="sortTable(3)">📈Key Usage Rate 🔽</th>
+                <th scope="col" class="h4" onclick="sortTable(0)">🏷️Name <span id="sortIcon0">🔽</span></th>
+                <th scope="col" class="h4" onclick="sortTable(1)">🕒Last Usage <span id="sortIcon1">🔽</span></th>
+                <th scope="col" class="h4" onclick="sortTable(2)">🔍Status <span id="sortIcon2">🔽</span></th>
+                <th scope="col" class="h4" onclick="sortTable(3)">📈Key Usage Rate <span id="sortIcon3">🔽</span></th>
                 <th scope="col" class="h4">🗑️Delete</th>
             </tr>
         </thead>
@@ -104,6 +104,7 @@
             table = document.getElementById("apikeyTable");
             switching = true;
             dir = "asc"; 
+            var sortIcon = document.getElementById("sortIcon" + n);
             while (switching) {
                 switching = false;
                 rows = table.rows;
@@ -134,6 +135,18 @@
                         dir = "desc";
                         switching = true;
                     }
+                }
+            }
+            // Update sort icon dynamically
+            if (dir == "asc") {
+                sortIcon.innerHTML = "🔼";
+            } else {
+                sortIcon.innerHTML = "🔽";
+            }
+            // Reset other icons
+            for (var j = 0; j < 4; j++) {
+                if (j !== n) {
+                    document.getElementById("sortIcon" + j).innerHTML = "🔽";
                 }
             }
         }
