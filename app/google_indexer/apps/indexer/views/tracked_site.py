@@ -25,9 +25,11 @@ class TrackedSiteListView(FormMixin, ListView, ProcessFormView):
     def get_queryset(self):
         # Récupérer le paramètre de tri de la requête
         sort = self.request.GET.get('sort', 'name')  # 'name' est la valeur par défaut si aucun tri n'est défini
-        queryset = TrackedSite.objects.all().order_by(sort)
-
-        return queryset
+        # Traiter le cas où l'utilisateur demande un tri descendant
+        if sort.startswith('-'):
+            return TrackedSite.objects.all().order_by(sort)
+        else:
+            return TrackedSite.objects.all().order_by(sort)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -45,24 +47,20 @@ class TrackedSiteListView(FormMixin, ListView, ProcessFormView):
                 last_indexation__lte=last_validation_reindex
             ).exclude(site__status=SITE_STATUS_HOLD).count()
 
+        # Ajouter le paramètre de tri actuel au contexte pour l'utiliser dans le template
+        context['current_sort'] = self.request.GET.get('sort', 'name')
+
         return context
 
     def post(self, request, *args, **kwargs):
-        """
-        Handle POST requests: instantiate a form instance with the passed
-        POST variables and then check if it's valid.
-        """
         self.object_list = self.get_queryset()
-
         form = self.get_form()
         if form.is_valid():
             self.object = form.save()
             update_sitemap(self.object.id)
-            return HttpResponseRedirect( reverse('indexer:site-detail', kwargs={'pk': self.object.pk}))
+            return HttpResponseRedirect(reverse('indexer:site-detail', kwargs={'pk': self.object.pk}))
         else:
             return self.form_invalid(form)
-
-
 
 class TrackedSiteDetailView(DetailView):
     model = TrackedSite
