@@ -2,101 +2,214 @@
 
 {% block apikey_nav_active %}active{% endblock apikey_nav_active %}
 
-
 {% block content %}
     <form action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         
         <h3 class="my-3">🔑API Keys Management</h3>
 
-<div class="key-usage-summary">
-        <span class="h4 my-3">⚡ Total API keys : <strong>{{ total_indexation_keys }}</strong></span><br/><span class="h5 my-3">🟢 Available API keys :  {{ available_keys_count }}</span>
-</div>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">⚡ Total API keys</th>
+            <th scope="col">🟢 Available API keys</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{ total_indexation_keys }}</td>
+            <td>{{ available_keys_count }}</td>
+        </tr>
+    </tbody>
+</table>
+
         
-<div class="accordion accordion-flush my-2 py-1" id="accordionFlushExample">
-  <div class="accordion-item">
-    <h2 class="accordion-header">
-      <button class="btn btn-outline-light collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
-        ✚<strong>Upload new keys</strong>
-      </button>
-    </h2>
-    <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
-     
-         <div class="accordion-body"> <div class="row align-items-center border border-light my-1 py-1">
-
-            <div class="col ">
-                <label for="{{ form.file.id_for_label }}" class="form-label">🔑Upload new keys</label>
-                <input class="form-control" multiple=true type="file" id="{{ form.file.id_for_label }}"
-                       name="{{ form.file.html_name }}">
-            </div>
-
-
-
-            
-            <div class="col">
-
-                <label class="form-label">Usage</label>
-                {% for value, name in form.usage.field.choices %}
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" value="{{ value }}"
-                               name="{{ form.usage.html_name }}"
-                                {% if forloop.first %} checked {% endif %}
-                               id="id_{{ form.field_name.name }}_{{ forloop.counter0 }}">
-                        <label class="form-check-label"
-                               for="id_{{ form.field_name.name }}_{{ forloop.counter0 }}">{{ name }}</label>
-
+        <div class="accordion accordion-flush my-2 py-1" id="accordionFlushExample">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="btn btn-outline-light collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                        ✚<strong>Upload new keys</strong>
+                    </button>
+                </h2>
+                <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                    <div class="accordion-body">
+                        <div class="row align-items-center border border-light my-1 py-1">
+                            <div class="col">
+                                <label for="{{ form.file.id_for_label }}" class="form-label">🔑Upload new keys</label>
+                                <input class="form-control" multiple=true type="file" id="{{ form.file.id_for_label }}" name="{{ form.file.html_name }}">
+                            </div>
+                            <div class="col">
+                                <label class="form-label">Usage</label>
+                                {% for value, name in form.usage.field.choices %}
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" value="{{ value }}" name="{{ form.usage.html_name }}" {% if forloop.first %} checked {% endif %} id="id_{{ form.field_name.name }}_{{ forloop.counter0 }}">
+                                        <label class="form-check-label" for="id_{{ form.field_name.name }}_{{ forloop.counter0 }}">{{ name }}</label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col">
+                                <button type="submit" class="btn btn-outline-success ms-auto">✚ Add keys</button>
+                            </div>
+                        </div>
                     </div>
-                {% endfor %}
-            </div>
-            <div class="col">
-                <button type="submit" class="btn btn-outline-success ms-auto">✚ Add keys</button>
+                </div>
             </div>
         </div>
-         </div>
-    </div>
-  </div>
-</div>        
-       
-       
     </form>
-    <table class="table">
+
+    <table id="apikeyTable" class="table">
         <thead>
-        <tr>
-            <th scope="col" classe="h4">🏷️Name</th>
-            
-            <th scope="col" classe="h4">🕒Last Usage</th>
-            <th scope="col" classe="h4">🔍Status</th>
-            <th scope="col" classe="h4">📈Key Usage Rate</th>
-            <th scope="col" classe="h4">🗑️Delete</th>
-        </tr>
+            <tr>
+                <th scope="col" class="h4" onclick="sortTable(0)">🏷️Name <span id="sortIcon0">🔽</span></th>
+                <th scope="col" class="h4" onclick="sortTable(1)">🕒Last Usage <span id="sortIcon1">🔽</span></th>
+                <th scope="col" class="h4" onclick="sortTable(2)">🔍Status <span id="sortIcon2">🔽</span></th>
+                <th scope="col" class="h4" onclick="sortTableNumeric(3)">📈Key Usage Rate <span id="sortIcon3">🔽</span></th>
+                <th scope="col" class="h4">🗑️Delete</th>
+            </tr>
         </thead>
         <tbody>
-        {% for apikey in object_list %}
-            <tr>
-
-                <th>{{ apikey.name }}</th>
-                
-                <td>{{ apikey.last_usage }}</td>
-                <td>{{ apikey.get_status_display }}</td>
-                <td>{{ apikey.count_of_the_day }} / {{ apikey.max_per_day }}</td>
-
-                <td>
-                    <a class="btn btn-outline-danger ms-auto" href="{% url "indexer:apikey-delete" pk=apikey.id %}">Delete</a>
-                </td>
-            </tr>
-        {% endfor %}
-
+            {% for apikey in object_list %}
+                <tr>
+                    <td>{{ apikey.name }}</td>
+                    <td>{{ apikey.last_usage }}</td>
+                    <td>{{ apikey.get_status_display }}</td>
+                    <td>{{ apikey.count_of_the_day }} / {{ apikey.max_per_day }}</td>
+                    <td>
+                        <a class="btn btn-outline-danger ms-auto" href="{% url "indexer:apikey-delete" pk=apikey.id %}">Delete</a>
+                    </td>
+                </tr>
+            {% endfor %}
         </tbody>
     </table>
-<!-- Pagination -->
-<div class="pagination my-4">
-    <span>Pages: </span>
-    {% for page_number in page_numbers %}
-        {% if page_number == page_obj.number %}
-            <strong>{{ page_number }}</strong>
-        {% else %}
-            <a href="?page={{ page_number }}" class="pagination me-2">{{ page_number }}</a>
-        {% endif %}
-    {% endfor %}
-</div>
+
+    <!-- Pagination -->
+    <div class="pagination-container my-4 d-flex justify-content-center">
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+                {% for page_number in page_numbers %}
+                    <li class="page-item {% if page_number == page_obj.number %}active{% endif %}">
+                        <a class="page-link" href="?page={{ page_number }}">{{ page_number }}</a>
+                    </li>
+                {% endfor %}
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+
+    <script>
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("apikeyTable");
+            switching = true;
+            dir = "asc"; 
+            var sortIcon = document.getElementById("sortIcon" + n);
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+                    if (x && y) {
+                        if (dir == "asc") {
+                            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                                shouldSwitch = true;
+                                break;
+                            }
+                        } else if (dir == "desc") {
+                            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                                shouldSwitch = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount ++; 
+                } else {
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+            // Update sort icon dynamically
+            if (dir == "asc") {
+                sortIcon.innerHTML = "🔼";
+            } else {
+                sortIcon.innerHTML = "🔽";
+            }
+            // Reset other icons
+            for (var j = 0; j < 4; j++) {
+                if (j !== n) {
+                    document.getElementById("sortIcon" + j).innerHTML = "🔽";
+                }
+            }
+        }
+
+        function sortTableNumeric(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("apikeyTable");
+            switching = true;
+            dir = "asc"; 
+            var sortIcon = document.getElementById("sortIcon" + n);
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = parseInt(rows[i].getElementsByTagName("TD")[n].innerText.split('/')[0].trim());
+                    y = parseInt(rows[i + 1].getElementsByTagName("TD")[n].innerText.split('/')[0].trim());
+                    if (dir == "asc") {
+                        if (x > y) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x < y) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount ++; 
+                } else {
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+            // Update sort icon dynamically
+            if (dir == "asc") {
+                sortIcon.innerHTML = "🔼";
+            } else {
+                sortIcon.innerHTML = "🔽";
+            }
+            // Reset other icons
+            for (var j = 0; j < 4; j++) {
+                if (j !== n) {
+                    document.getElementById("sortIcon" + j).innerHTML = "🔽";
+                }
+            }
+        }
+    </script>
 {% endblock content %}
