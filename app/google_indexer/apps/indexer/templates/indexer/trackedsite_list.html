@@ -67,8 +67,8 @@
             <tr>
                 <th scope="col" class="h4" onclick="sortTable(0)">🌐Website <span id="sortIcon0">🔽</span></th>
                 <th scope="col" class="h4" onclick="sortTable(1)">⚙️Status <span id="sortIcon1">🔽</span></th>
-                <th scope="col" class="h4" onclick="sortTable(2)">🚀Sending <span id="sortIcon2">🔽</span></th>
-                <th scope="col" class="h4" onclick="sortTable(3)">📄Total pages <span id="sortIcon3">🔽</span></th>
+                <th scope="col" class="h4" onclick="sortTableNumeric(2)">🚀Sending <span id="sortIcon2">🔽</span></th>
+                <th scope="col" class="h4" onclick="sortTableNumeric(3)">📄Total pages <span id="sortIcon3">🔽</span></th>
                 <th scope="col" class="h4">🛠️Actions</th>
                 <th scope="col" class="h4">🔍Outils</th>
             </tr>
@@ -121,7 +121,7 @@
     {% endwith %}
 
     <script>
-        function sortTable(n) {
+        function sortTableNumeric(n) {
             var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
             table = document.getElementById("websiteTable");
             switching = true;
@@ -132,19 +132,17 @@
                 rows = table.rows;
                 for (i = 1; i < (rows.length - 1); i++) {
                     shouldSwitch = false;
-                    x = rows[i].getElementsByTagName("TD")[n];
-                    y = rows[i + 1].getElementsByTagName("TD")[n];
-                    if (x && y) {
-                        if (dir == "asc") {
-                            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                                shouldSwitch = true;
-                                break;
-                            }
-                        } else if (dir == "desc") {
-                            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-                                shouldSwitch = true;
-                                break;
-                            }
+                    x = parseInt(rows[i].getElementsByTagName("TD")[n].innerText.replace(/,/g, ''));
+                    y = parseInt(rows[i + 1].getElementsByTagName("TD")[n].innerText.replace(/,/g, ''));
+                    if (dir == "asc") {
+                        if (x > y) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x < y) {
+                            shouldSwitch = true;
+                            break;
                         }
                     }
                 }
