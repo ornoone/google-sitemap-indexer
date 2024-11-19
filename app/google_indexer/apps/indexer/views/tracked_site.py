@@ -12,7 +12,7 @@ from django.conf import settings
 from google_indexer.apps.indexer.form import TrackedSiteForm
 from google_indexer.apps.indexer.models import TrackedSite, TrackedPage, PAGE_STATUS_NEED_INDEXATION, \
     SITE_STATUS_PENDING, PAGE_STATUS_PENDING_INDEXATION_CALL, \
-    SITE_STATUS_HOLD, SITE_STATUS_OK, PAGE_STATUS_INDEXED
+    SITE_STATUS_HOLD, SITE_STATUS_OK, PAGE_STATUS_INDEXED, ApiKey
 from google_indexer.apps.indexer.tasks import update_sitemap, index_page
 
 WAIT_REINDEX_PAGES_DAYS = settings.WAIT_REINDEX_PAGES_DAYS
@@ -44,6 +44,10 @@ class TrackedSiteListView(FormMixin, ListView, ProcessFormView):
                 status=PAGE_STATUS_INDEXED,
                 last_indexation__lte=last_validation_reindex
             ).exclude(site__status=SITE_STATUS_HOLD).count()
+        # Ajouter les informations des clés API
+        usage_counts = ApiKey.total_usage_counts()
+        context['total_indexation_keys'] = usage_counts['total_indexation_keys']
+        context['available_keys_count'] = ApiKey.objects.filter(count_of_the_day__lt=F('max_per_day')).count()
 
         return context
 
