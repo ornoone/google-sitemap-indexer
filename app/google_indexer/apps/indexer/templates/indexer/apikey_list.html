@@ -2,28 +2,18 @@
 
 {% block apikey_nav_active %}active{% endblock apikey_nav_active %}
 
+
 {% block content %}
     <form action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         
         <h3 class="my-3">🔑API Keys Management</h3>
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th scope="col">⚡ Total API keys</th>
-            <th scope="col">🟢 Available API keys</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>{{ total_indexation_keys }}</td>
-            <td>{{ available_keys_count }}</td>
-        </tr>
-    </tbody>
-</table>
+<div class="key-usage-summary">
+        <span class="h4 my-3">⚡ Total API keys : <strong>{{ total_indexation_keys }}</strong></span><br/><span class="h5 my-3">🟢 Available API keys :  {{ available_keys_count }}</span>
+</div>
         
-        <div class="accordion accordion-flush my-2 py-1" id="accordionFlushExample">
+<div class="accordion accordion-flush my-2 py-1" id="accordionFlushExample">
   <div class="accordion-item">
     <h2 class="accordion-header">
       <button class="btn btn-outline-light collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
