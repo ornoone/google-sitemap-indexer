@@ -14,7 +14,17 @@ class ApiKeyListView(FormMixin, ListView, ProcessFormView):
     model = ApiKey
     form_class = ApikeyImportForm
     queryset = ApiKey.objects.all().order_by('name')
-    paginate_by = 100  #définir la pagination à 50 clés par page
+    paginate_by = 100
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        sort = self.request.GET.get('sort', 'name')
+        
+        # Gérez l'ordre de tri en vérifiant s'il commence par un '-'
+        if sort.startswith('-'):
+            return queryset.order_by(sort)
+        else:
+            return queryset.order_by(sort)
 
     def get_success_url(self):
         return reverse('indexer:apikey-list')
