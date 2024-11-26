@@ -1,8 +1,10 @@
 from traceback import print_exc
-
+import time
+import socket
 import requests
 import xml.etree.ElementTree as ET
-
+from google.auth.exceptions import TransportError
+from requests.exceptions import ConnectionError
 from django.db import transaction
 from django.utils import timezone
 from django.db.models import Q, F
@@ -41,32 +43,49 @@ from google.auth.transport.requests import Request
 
 
 def call_indexation(url, apikey):
-
     SCOPES = ["https://www.googleapis.com/auth/indexing"]
     ENDPOINT = "https://indexing.googleapis.com/v3/urlNotifications:publish"
-    credentials = service_account.Credentials.from_service_account_info(apikey.content, scopes=SCOPES)
-    if not credentials.valid:
-        credentials.refresh(Request())
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {credentials.token}"
-    }
-    data = {
-        "url": url,
-        "type": "URL_UPDATED"
-    }
-    response = requests.post(ENDPOINT, headers=headers, json=data)
-    status_code = response.status_code
-    if status_code == 200:
-        return True
-    elif status_code == 429:
-        raise ApiKeyExpired()
-    elif status_code == 403:
-        raise ApiKeyInvalid()
-    else:
-        print("got unknown response")
-        print(response.json())
-        raise Exception("unkwonn status code %s" % status_code)
+    
+    while True:  # Boucle pour réessayer en cas d'erreur de réseau
+        try:
+            credentials = service_account.Credentials.from_service_account_info(apikey.content, scopes=SCOPES)
+            if not credentials.valid:
+                credentials.refresh(Request())
+                
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {credentials.token}"
+            }
+            data = {
+                "url": url,
+                "type": "URL_UPDATED"
+            }
+
+            response = requests.post(ENDPOINT, headers=headers, json=data)
+            status_code = response.status_code
+
+            if status_code == 200:
+                return True
+            elif status_code == 429:
+                raise ApiKeyExpired()
+            elif status_code == 403:
+                raise ApiKeyInvalid()
+            elif status_code == 503:
+                print("Service unavailable (503). Mise en pause de 60 secondes avant de réessayer.")
+                time.sleep(60)  # Pause de 60 secondes avant de réessayer
+            else:
+                print("got unknown response")
+                print(response.json())
+                raise Exception("unknown status code %s" % status_code)
+                
+        except (socket.gaierror, TransportError, ConnectionError) as e:
+            # Gestion des erreurs de connexion ou de résolution DNS
+            if isinstance(e, socket.gaierror) or "Temporary failure in name resolution" in str(e) or "[Errno 101] Network is unreachable" in str(e):
+                print("Erreur réseau détectée. Mise en pause de 60 secondes avant de réessayer.")
+                time.sleep(60)  # Pause de 60 secondes avant de réessayer
+            else:
+                # Ré-élévation de l'exception si elle n'est pas une erreur de réseau que nous gérons ici
+                raise
 
 
 def get_available_apikey(now, usage) -> ApiKey | None:
