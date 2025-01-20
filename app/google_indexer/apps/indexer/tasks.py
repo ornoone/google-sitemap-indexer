@@ -201,7 +201,7 @@ def index_page(page_id):
             print("appel d'indexation terminé")
             
         except ApiKeyExpired:
-            print("api key expired. actual count: ", apikey.count_of_the_day))
+            print("api key expired. actual count: ", apikey.count_of_the_day)
             error = None
             apikey.count_of_the_day = apikey.max_per_day + 1
             apikey.save()
