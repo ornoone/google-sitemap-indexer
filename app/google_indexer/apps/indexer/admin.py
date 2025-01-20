@@ -54,3 +54,8 @@ class ApiKeyAdmin(admin.ModelAdmin):
 class CallErrorAdmin(admin.ModelAdmin):
     list_display = ("date", "api_key", "page", "site")
     readonly_fields = ("api_key", "date", "page", "site")
+
+    actions = ["silent_delete"]
+
+    def silent_delete(self, request, queryset):
+        queryset.delete()

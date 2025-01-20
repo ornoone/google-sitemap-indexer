@@ -46,5 +46,5 @@ docker compose -f docker-compose.yaml -f docker-compose.dev.yaml run backend ./m
 
 D. to add an user
 ```
-docker compose -f docker-compose.yaml -f docker-compose.dev.yaml run backend ./manage.py shell_plus   
+docker compose -f docker-compose.yaml -f docker-compose.dev.yaml run backend ./manage.py createsuperuser
 ```
