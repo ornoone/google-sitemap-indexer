@@ -82,7 +82,7 @@ class TrackedSite(models.Model):
 
 class TrackedPage(models.Model):
     site = models.ForeignKey(TrackedSite, on_delete=models.CASCADE, null=False, related_name="pages")
-    url = models.URLField(null=False, blank=False)
+    url = models.URLField(max_length=1000, null=False, blank=False)
     
     # Statut de la page
     status = models.CharField(max_length=255, choices=[
