@@ -79,7 +79,7 @@
                         <form method="post" action="{% url 'indexer:site-action' pk=site.id %}" style="display: inline-block !important;">
                             {% csrf_token %}
                             <input type="hidden" name="action" value="hold"/>
-                            <button class="btn btn-outline-warning" type="submit" title="Pause Indexation">⏸️</button>
+                            <button class="btn btn-outline-success" type="submit" title="Pause Indexation">⏸️</button>
                         </form>
                     {% endif %}
                     <a class="btn btn-outline-danger ms-1" href="{% url "indexer:site-delete" pk=site.id %}" title="Delete Websire">🗑️</a>
