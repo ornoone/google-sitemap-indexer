@@ -25,10 +25,10 @@ class TrackedSite(models.Model):
     name = models.CharField(max_length=255, null=False, blank=False)
     sitemap_url = models.URLField(null=False, blank=False)
     status = models.CharField(max_length=255, choices=[
-        (SITE_STATUS_CREATED, "Created"),
-        (SITE_STATUS_PENDING, "Pending"),
-        (SITE_STATUS_HOLD, "Hold"),
-        (SITE_STATUS_OK, "Up to date"),
+        (SITE_STATUS_CREATED, "🆕 Created"),
+        (SITE_STATUS_PENDING, "🟠 Pending"),
+        (SITE_STATUS_HOLD, "🔴 Hold"),
+        (SITE_STATUS_OK, "🟢 Up to date"),
     ], default=SITE_STATUS_CREATED)
 
     next_update = models.DateTimeField(null=True, blank=True)
